@@ -1,9 +1,10 @@
 import { TranslatorPanel } from "../elements/panel";
 import { MathTextboxElement } from "../elements/mathTextbox";
+import { config } from "../../package.json";
 
 const elements = {
-  "translator-plugin-panel": TranslatorPanel,
-  "math-textbox": MathTextboxElement,
+  [`${config.addonRef}-panel`]: TranslatorPanel,
+  [`${config.addonRef}-math-textbox`]: MathTextboxElement,
 } as unknown as Record<string, CustomElementConstructor>;
 
 for (const [key, constructor] of Object.entries(elements)) {

@@ -1,43 +1,63 @@
 import { aesEcbEncrypt, base64 } from "../../utils/crypto";
 import { getPref, getPrefJSON, setPref } from "../../utils/prefs";
+import { publishTranslateTaskProgress } from "../../utils/task";
 import { TranslateService } from "./base";
+import { CNKI_MAX_TEXT_LENGTH, splitCnkiText } from "./cnkiChunks";
+import { CnkiTokenCache } from "./cnkiToken";
 
-async function requestWithRetry<T>(
-  fn: () => Promise<T>,
-  retries: number,
-  baseDelayMs: number,
-) {
-  let lastError: unknown;
-  for (let attempt = 0; attempt <= retries; attempt++) {
-    try {
-      return await fn();
-    } catch (e) {
-      lastError = e;
-      if (attempt === retries) {
-        ztoolkit.log(`CNKI request failed after ${retries + 1} attempts`, e);
-        throw e;
-      }
-      await new Promise((resolve) =>
-        setTimeout(resolve, baseDelayMs * (attempt + 1)),
-      );
-    }
-  }
-  throw lastError;
+const CNKI_REQUEST_TIMEOUT_MS = 15000;
+
+type CnkiResponse = {
+  code?: number | string;
+  message?: unknown;
+  msg?: unknown;
+  error?: unknown;
+  data?: {
+    isInputVerificationCode?: boolean;
+    mResult?: unknown;
+    message?: unknown;
+    msg?: unknown;
+  };
+};
+
+function responseDetail(response: CnkiResponse | undefined): string {
+  const details = [
+    response?.code === undefined ? undefined : `code=${response.code}`,
+    response?.message,
+    response?.msg,
+    response?.error,
+    response?.data?.message,
+    response?.data?.msg,
+  ].filter((value) => typeof value === "string" && value.length > 0);
+  return details.length ? `（服务返回：${details.join("；")}）` : "";
 }
 
 const translate = <TranslateService["translate"]>async function (data) {
-  let progressWindow;
-  const useSplit = getPref("cnkiUseSplit") as boolean;
-  const splitSecond = getPref("cnkiSplitSecond") as number;
-  if (!data.silent) {
-    progressWindow = new ztoolkit.ProgressWindow("PDF Translate");
+  const useSplit = getPref("cnkiUseSplit") !== false;
+  const configuredDelay = Number(getPref("cnkiSplitSecond"));
+  const splitDelayMs =
+    (Number.isFinite(configuredDelay) ? Math.max(0, configuredDelay) : 1) *
+    1000;
+  if (!data.raw) {
+    data.result = "";
+    return;
+  }
+  if (!useSplit && data.raw.length > CNKI_MAX_TEXT_LENGTH) {
+    throw new Error(
+      `知网单次最多翻译 ${CNKI_MAX_TEXT_LENGTH} 个字符，当前选中了 ${data.raw.length} 个字符。请在知网服务设置中启用分片翻译，或缩短选区后重试。原文未截断。`,
+    );
   }
 
   const processTranslation = async (text: string) => {
-    const token = await getToken();
-    const xhr = await requestWithRetry(
-      async () =>
-        Zotero.HTTP.request(
+    let token = await getToken();
+    const words = await getWord(text);
+    // Authentication refresh is the only automatic retry. Human verification,
+    // network errors and rate limits must be surfaced rather than retried.
+    for (let attempt = 0; attempt < 2; attempt++) {
+      if (!publishTranslateTaskProgress(data)) return undefined;
+      let xhr: XMLHttpRequest;
+      try {
+        xhr = await Zotero.HTTP.request(
           "POST",
           "https://dict.cnki.net/fyzs-front-api/translate/literaltranslation",
           {
@@ -46,108 +66,136 @@ const translate = <TranslateService["translate"]>async function (data) {
               Token: token,
             },
             body: JSON.stringify({
-              words: await getWord(text),
+              words,
               translateType: null,
             }),
             responseType: "json",
+            successCodes: [200, 401],
+            timeout: CNKI_REQUEST_TIMEOUT_MS,
+            // Zotero otherwise retries 5xx responses for up to an hour.
+            errorDelayMax: 0,
           },
-        ),
-      2,
-      500,
-    );
+        );
+      } catch (error) {
+        throw new Error(
+          `知网翻译请求失败，请稍后重试或切换翻译源。原始错误：${String(error)}`,
+        );
+      }
 
-    if (xhr.response.data?.isInputVerificationCode) {
-      throw "Your access is temporarily banned by the CNKI service. Please goto https://dict.cnki.net/, translate manually and pass human verification.";
+      if (!publishTranslateTaskProgress(data)) return undefined;
+      const response = xhr.response as CnkiResponse | undefined;
+      const detail = responseDetail(response);
+      if (response?.data?.isInputVerificationCode) {
+        throw new Error(
+          `知网要求人工验证。请打开 https://dict.cnki.net/，手动翻译并完成验证，再回到 Zotero 重试。${detail}`,
+        );
+      }
+      if (xhr.status === 401 || Number(response?.code) === 401) {
+        if (attempt === 0) {
+          token = await getToken(true, token);
+          continue;
+        }
+        throw new Error(
+          `知网登录令牌失效，刷新一次后仍无法访问。请稍后重试或切换翻译源。${detail}`,
+        );
+      }
+      if (response?.code !== undefined && Number(response.code) !== 200) {
+        throw new Error(`知网服务拒绝了翻译请求。${detail}`);
+      }
+      const translated = response?.data?.mResult;
+      if (typeof translated !== "string" || translated.length === 0) {
+        throw new Error(`知网未返回有效译文（缺少 mResult）。${detail}`);
+      }
+      let regex: RegExp;
+      try {
+        regex = new RegExp(getPref("cnkiRegex") as string, "g");
+      } catch (error) {
+        throw new Error(`知网服务的过滤正则无效。原始错误：${String(error)}`);
+      }
+      return translated.replace(regex, "");
     }
-
-    let tgt = xhr.response.data?.mResult;
-    tgt = tgt.replace(new RegExp(getPref("cnkiRegex") as string, "g"), "");
-    return tgt;
+    throw new Error("知网翻译请求未完成，请重试。");
   };
 
-  if (useSplit) {
-    const sentences = data.raw
-      .split(/[.?!]/)
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0);
-    const chunks = [];
-    let currentChunk = "";
-    sentences.forEach((sentence: string) => {
-      const sentenceWithPeriod = sentence + ". ";
-      if (currentChunk.length + sentenceWithPeriod.length > 800) {
-        chunks.push(currentChunk);
-        currentChunk = sentenceWithPeriod;
-      } else {
-        currentChunk += sentenceWithPeriod;
-      }
-    });
-    if (currentChunk) {
-      chunks.push(currentChunk);
+  const chunks = useSplit ? splitCnkiText(data.raw) : [data.raw];
+  const translations: string[] = [];
+  for (let index = 0; index < chunks.length; index++) {
+    if (!publishTranslateTaskProgress(data)) return;
+    const translated = await processTranslation(chunks[index]);
+    if (translated === undefined) return;
+    translations.push(translated);
+    data.result = translations.join(" ");
+    addon.api.getTemporaryRefreshHandler({ task: data })();
+    if (index < chunks.length - 1 && splitDelayMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, splitDelayMs));
     }
-    let translatedText = "";
-    for (const chunk of chunks) {
-      translatedText += (await processTranslation(chunk)) + " ";
-      data.result = translatedText.trim();
-      addon.api.getTemporaryRefreshHandler({ task: data })();
-      await new Promise((resolve) => setTimeout(resolve, splitSecond * 1000));
-    }
-    // data.result = translatedText.trim();
-  } else {
-    if (data.raw.length > 800) {
-      progressWindow
-        ?.createLine({
-          text: `Maximum text length is 800, ${data.raw.length} selected. Will only translate first 800 characters. If you want the plugin to automatically split the translation based on punctuation, you can enable the split switch in the preferences.`,
-        })
-        .show();
-      data.raw = data.raw.slice(0, 800);
-    }
-
-    data.result = await processTranslation(data.raw);
   }
 };
 
-export async function getToken(forceRefresh: boolean = false) {
-  let token = "";
-  // Just in case the update fails
-  let doRefresh = true;
-  try {
-    const tokenObj = getPrefJSON("cnkiToken");
-    if (
-      !forceRefresh &&
-      tokenObj?.token &&
-      new Date().getTime() - tokenObj.t < 300 * 1000
-    ) {
-      token = tokenObj.token;
-      doRefresh = false;
-    }
-  } catch (e) {
-    ztoolkit.log(e);
-  }
-  if (doRefresh) {
-    const xhr = await requestWithRetry(
-      () =>
-        Zotero.HTTP.request(
-          "GET",
-          "https://dict.cnki.net/fyzs-front-api/getToken",
-          {
-            responseType: "json",
-          },
-        ),
-      2,
-      300,
-    );
-    if (xhr && xhr.response && xhr.response.code === 200) {
-      token = xhr.response.data;
-      setPref(
-        "cnkiToken",
-        JSON.stringify({
-          t: new Date().getTime(),
-          token: xhr.response.data,
-        }),
+const tokenCache = new CnkiTokenCache({
+  readCache: () => getPrefJSON("cnkiToken"),
+  writeCache: (record) => setPref("cnkiToken", JSON.stringify(record)),
+  request: async () => {
+    let xhr: XMLHttpRequest;
+    try {
+      xhr = await Zotero.HTTP.request(
+        "GET",
+        "https://dict.cnki.net/fyzs-front-api/getToken",
+        {
+          responseType: "json",
+          timeout: CNKI_REQUEST_TIMEOUT_MS,
+          errorDelayMax: 0,
+        },
       );
+    } catch (error) {
+      throw new Error(`知网获取令牌失败。原始错误：${String(error)}`);
     }
-  }
-  return token;
+    const response = xhr.response;
+    if (
+      Number(response?.code) !== 200 ||
+      typeof response?.data !== "string" ||
+      !response.data
+    ) {
+      throw new Error(`知网未返回有效令牌。${responseDetail(response)}`);
+    }
+    return response.data;
+  },
+});
+
+let readerPrewarms = new WeakMap<object, Promise<boolean>>();
+
+export function getToken(
+  forceRefresh = false,
+  rejectedToken?: string,
+): Promise<string> {
+  return tokenCache.get(forceRefresh, rejectedToken);
+}
+
+/** One best-effort anonymous GET per reader; never a translation POST. */
+export function prewarmCnkiToken(
+  reader: object,
+  isReaderOpen: () => boolean = () => true,
+): Promise<boolean> {
+  if (getPref("translateSource") !== "cnki") return Promise.resolve(false);
+  const previous = readerPrewarms.get(reader);
+  if (previous) return previous;
+  const warmup = Promise.resolve()
+    .then(async () => {
+      if (!isReaderOpen()) return false;
+      await getToken();
+      return isReaderOpen();
+    })
+    .catch(() => false);
+  // Failed warmups stay recorded too. Only an explicit translation/retry may
+  // request again; rerendering a toolbar must not retry a failed prefetch.
+  readerPrewarms.set(reader, warmup);
+  return warmup;
+}
+
+/** Called by root lifecycle cleanup; no cache clearing or background timers. */
+export function cancelCnkiTokenWork(): void {
+  tokenCache.cancelPending();
+  readerPrewarms = new WeakMap();
 }
 
 export async function getWord(text: string) {

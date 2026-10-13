@@ -44,12 +44,8 @@ service-youdaodict=有道词典(en→zh)🔊
 service-freedictionaryapi=FreeDictionaryAPI(en→en)
 service-webliodict=Weblio Dict(en→ja)
 service-gramotadict=Gramota.ru(ru)
-service-errorPrefix=[请求错误]
-    此翻译服务不可用，可能是密钥错误，也可能是请求过快。
-    可以尝试其他翻译服务，或者来此查看相关回答：
-    https://zotero.yuque.com/staff-gkhviy/pdf-trans/age09f
-    
-    请注意，这些错误与 Zotero 和本翻译插件无关，由该翻译服务引起：
+service-errorPrefix=翻译请求失败
+    请查看下方原因，重试或切换翻译源。
 
 service-niutranspro-error-insufficient-balance=
     当前小牛翻译积分不足，无法完成翻译请求。
@@ -206,3 +202,7 @@ service-nllb-dialog-apistream=nllb-api 流式输出
 service-nllb-dialog-serveendpoint=nllb-serve 接口
 service-nllb-dialog-apilabel=nllb-api 文档
 service-nllb-dialog-servelabel=nllb-serve 文档
+
+reliable-setup-original-active = 当前旧版 Translate for Zotero 仍在运行。为避免重复翻译，新版已暂停。请在「工具 → 插件」停用旧版，再重新启用本插件或重启 Zotero；原版设置会保留。
+reliable-setup-status-unknown = 无法确认旧版翻译插件是否仍在运行，新版已暂停以避免重复翻译。请重启 Zotero 后再试；没有更改旧版的启用状态。
+reliable-setup-migration-failed = 旧配置在本机迁移时未能完成，新版已暂停。原版配置保持不变，请重启 Zotero 后再试；配置内容不会写入日志。

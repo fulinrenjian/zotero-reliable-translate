@@ -1,0 +1,177 @@
+File: KaTeX 0.16.25/src/fonts/Makefile
+#!gmake
+#
+# Version: Apache License 2.0
+#
+# Copyright (c) 2013 MathJax Project
+# Copyright (c) 2013 The MathJax Consortium
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+CUSTOM=custom.cfg
+
+-include $(CUSTOM)
+
+MFTRACE_MODIFIED=lib/mftrace-modified
+
+all: config fonts
+
+
+
+File: KaTeX 0.16.25/src/fonts/default.cfg
+# Note: paths should be absolute, unless they point to programs in your $PATH.
+
+##### Standard programs #####
+GREP=grep
+PERL=perl
+PYTHON=python3
+SED=sed
+WHICH=which
+KPSEWHICH=kpsewhich
+
+##### Font tools #####
+# Most of the tools below are standard and should be available from your package manager.
+FONTFORGE=fontforge
+MFTRACE=mftrace
+TTX=ttx
+TTFAUTOHINT=ttfautohint
+
+##### TeXLive Encoding
+TETEXENCODING=/usr/share/texlive/texmf-texlive/fonts/enc/dvips/tetex/
+BASEENCODING=/usr/share/texlive/texmf-texlive/fonts/enc/dvips/base/
+
+File: KaTeX 0.16.25/src/fonts/generate_fonts.py
+#!/usr/bin/env python3
+
+import sys
+import os
+import json
+
+from fontTools.ttLib import TTFont, sfnt
+from fontTools.misc.timeTools import timestampNow
+sfnt.USE_ZOPFLI = True
+
+if len(sys.argv) < 2:
+    print("Usage: %s <font file>" % sys.argv[0])
+    sys.exit(1)
+
+font_file = sys.argv[1]
+font_name = os.path.splitext(os.path.basename(font_file))[0]
+
+
+font = TTFont(font_file, recalcBBoxes=False, recalcTimestamp=False)
+
+# fix timestamp to the epoch
+font['head'].created = 0
+font['head'].modified = 0
+
+# remove fontforge timestamps
+if 'FFTM' in font:
+    del font['FFTM']
+
+
+
+File: KaTeX 0.16.25/src/fonts/makeBlacker
+#! /usr/bin/perl
+
+#  Creates the metafont file needed for darker copies of the TeX fonts,
+#  and modifies mftrace to use it.
+#
+#  Usage:  ./makeBlacker blackness
+
+require "custom.cfg.pl";
+
+$blacker = shift;
+unless ($blacker) {
+  print stderr "Usage:  ./makeBlacker blackness\n";
+  exit;
+}
+
+sub editMftrace {
+  my $oldMFTRACE = $MFTRACE_PATH;
+  $MFTRACE = "./lib/mftrace-modified";
+  print "Editing mftrace\n";
+  open(MFT,$oldMFTRACE) || die "Can't read '$oldMFTRACE': $!\n";
+  my $MFT = join("",<MFT>);
+  close(MFT);
+  $MFT =~ s!r"mf '\\mode:=(?:[^;]*)(; [^"]*)"!r"""mf '\\smode:="lib/blacker.mf"$1"""!;
+  open(MFT,">$MFTRACE") || die "Can't write '$MFTRACE': $!\n";
+  print MFT $MFT;
+  close(MFT);
+  chmod 0755, $MFTRACE;
+}
+
+
+File: KaTeX 0.16.25/src/fonts/makeFF
+#! /usr/bin/perl
+
+#  Creates the FontForge files needed to create the
+#  KaTeX fonts from the TeX source files, constructing some
+#  glyphs from two or more parts, when needed.
+#
+#  Usage:  ./makeFF
+
+require "custom.cfg.pl";
+
+#########################################################################
+
+$map{cmr10} = {
+  "Main-Regular" => [
+    [0,1] => 0x393,         # \Gamma, \Delta
+    2 => 0x398,             # \Theta
+    3 => 0x39B,             # \Lambda
+    4 => 0x39E,             # \Xi
+    5 => 0x3A0,             # \Pi
+    6 => 0x3A3,             # \Sigma
+    [7,8] => 0x3A5,         # \Upsilon, \Phi
+    [9,0xA] => 0x3A8,       # \Psi, \Omega
+
+    0x10 => 0x131,          # \i
+    0x11 => 0x237,          # \j
+    0x12 => 0x2CB,          # \grave
+    0x13 => 0x2CA,          # \acute
+    0x14 => 0x2C7,          # \check
+
+
+File: KaTeX 0.16.25/src/fonts/xbbold.mf
+%% filename: xbbold.mf
+%% version: 2.2
+%% date: 1995/01/04
+%%
+%% (katex-fonts) The line 69 is modified to prevent overflow
+%%
+%% American Mathematical Society
+%% Technical Support
+%% Publications Technical Group
+%% 201 Charles Street
+%% Providence, RI 02904
+%% USA
+%% tel: (401) 455-4080
+%%      (800) 321-4267 (USA and Canada only)
+%% fax: (401) 331-3842
+%% email: tech-support@ams.org
+%%
+%% Copyright 1995, 2009 American Mathematical Society.
+%%
+%% This Font Software is licensed under the SIL Open Font License,
+%% Version 1.1.  This license is in the accompanying file OFL.txt, and
+%% is also available with a FAQ at: http://scripts.sil.org/OFL.
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Changes of minimal parameters in outlined characters for version 2.1
+% done by Stefan Lindner, 18-April-1991
+
+
+

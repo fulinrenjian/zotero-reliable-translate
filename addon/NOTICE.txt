@@ -1,0 +1,10 @@
+Reliable Translate 0.1.2
+Fork initiated and maintained by fulinrenjian; development assisted by AI.
+Based on Translate for Zotero v2.4.8 by windingwind and contributors.
+Upstream commit: 2e3d77ddbf3157d8813c61c828957386ab802bdb
+Local changes: 2026-10-12 to 2026-10-13. Reader-bound status, retry, bounded provider requests, stale-response isolation, literal CNKI chunks, single-flight CNKI token warming, working selection notes with safe append, namespaced preferences and UI.
+License: AGPL-3.0-or-later; corresponding source is supplied alongside this XPI.
+Publication preparation on 2026-10-13: independent project metadata, fork icon,
+documentation, third-party license notices and corresponding dependency sources.
+These changes do not claim sole authorship of the upstream project.
+Third-party components retain their own licenses; see THIRD_PARTY_NOTICES.txt.

@@ -1,5 +1,5 @@
 import { getPref } from "./utils/prefs";
-import { TranslateTask } from "./utils/task";
+import { TranslateTask, publishTranslateTaskProgress } from "./utils/task";
 import { version } from "../package.json";
 
 /**
@@ -139,13 +139,16 @@ function getTemporaryRefreshHandler(options?: { task?: TranslateTask }) {
   if (translateTask && translateTask.type !== "text") {
     return () => {};
   }
-  const newTick = `${Zotero.Utilities.randomString()}-${Date.now()}`;
-  addon.data.translate.refreshTick = newTick;
+  if (translateTask && !publishTranslateTaskProgress(translateTask)) {
+    return () => {};
+  }
   return () => {
-    if (addon.data.translate.refreshTick === newTick) {
-      addon.hooks.onReaderPopupRefresh();
-      addon.hooks.onReaderTabPanelRefresh();
-    }
+    if (!addon.data.alive) return;
+    if (translateTask && !publishTranslateTaskProgress(translateTask)) return;
+    // Each popup is bound to its own task; a global refresh tick loses streams
+    // when two different readers receive results at the same time.
+    addon.hooks.onReaderPopupRefresh();
+    addon.hooks.onReaderTabPanelRefresh();
   };
 }
 

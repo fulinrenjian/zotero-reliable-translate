@@ -8,3 +8,13 @@ zotero-cmd.json
 .DS_Store
 .env
 .scaffold
+release-artifacts/
+validation-*.log
+zotero-cmd.*.json
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+prefs.js
+user.js
+.env.*
+!.env.example

@@ -6,6 +6,10 @@ import {
   sanitizeTaskForLog,
   TranslateTask,
   TranslateTaskRunner,
+  autoDetectLanguage,
+  updateTranslateTaskLang,
+  invalidateTranslateTask,
+  matchLanguage,
   stripEmptyLines,
 } from "../../utils";
 
@@ -100,6 +104,7 @@ const register: TranslateService[] = [
 ];
 
 export class TranslationServices {
+  #inFlight = new WeakMap<TranslateTask, Promise<boolean>>();
   #services: readonly TranslateService[] = Object.freeze(
     this.sortServices(register),
   );
@@ -242,13 +247,45 @@ export class TranslationServices {
       noCache?: boolean;
     } = {},
   ): Promise<boolean> {
+    task = task || getLastTranslateTask();
+    if (!task || !task.raw?.trim() || !addon.data.alive) return false;
+    const pending = this.#inFlight.get(task);
+    if (pending) return pending;
+    const currentTask = task;
+    const work = this.runTask(currentTask, options).catch(() => {
+      invalidateTranslateTask(currentTask);
+      currentTask.status = "fail";
+      currentTask.result = "翻译请求未完成，请重试或切换翻译源。";
+      if (!options.noDisplay && addon.data.alive)
+        addon.api.getTemporaryRefreshHandler()();
+      return false;
+    });
+    this.#inFlight.set(currentTask, work);
+    try {
+      return await work;
+    } finally {
+      if (this.#inFlight.get(currentTask) === work)
+        this.#inFlight.delete(currentTask);
+    }
+  }
+
+  private async runTask(
+    task: TranslateTask,
+    options: {
+      noCheckZoteroItemLanguage?: boolean;
+      noDisplay?: boolean;
+      noCache?: boolean;
+    },
+  ): Promise<boolean> {
     ztoolkit.log("runTranslationTask", options);
     const { noCache, noCheckZoteroItemLanguage, noDisplay } = options;
-
-    task = task || getLastTranslateTask();
-    if (!task || !task.raw) {
-      ztoolkit.log("skipped empty");
-      return false;
+    invalidateTranslateTask(task);
+    if (task.processed) updateTranslateTaskLang(task);
+    if (!task.langfrom || !task.langto) {
+      const detected = autoDetectLanguage(Zotero.Items.get(task.itemId || -1));
+      task.langfrom = task.langfrom || detected.fromLanguage;
+      task.langto = task.langto || detected.toLanguage;
+      if (detected.isInferred) task.langfromInferred = true;
     }
     task.status = "processing" as TranslateTask["status"];
     // Check whether item language is in disabled languages list
@@ -256,20 +293,29 @@ export class TranslationServices {
     if (!noCheckZoteroItemLanguage && task.itemId) {
       const item = Zotero.Items.getTopLevel([Zotero.Items.get(task.itemId)])[0];
       if (item && task.type !== "custom") {
-        const itemLanguage = getPref("autoDetectLanguage")
-          ? task.langfrom
-          : ((item.getField("language") as string) || "").split("-")[0];
-        const disabledLanguages = (
-          getPref("disabledLanguages") as string
-        ).split(",");
+        const declaredLanguage = String(item.getField("language") || "").trim();
+        const itemLanguage = declaredLanguage
+          ? matchLanguage(declaredLanguage).code || declaredLanguage
+          : task.langfrom || "";
+        const disabledLanguages = (getPref("disabledLanguages") as string)
+          .split(/[,;，；]/)
+          .map((lang) => lang.trim().toLowerCase())
+          .filter(Boolean);
         disabledByItemLanguage =
-          disabledLanguages.length > 0 &&
           !!itemLanguage &&
-          disabledLanguages.includes(itemLanguage);
+          disabledLanguages.some(
+            (language) =>
+              language === itemLanguage.toLowerCase() ||
+              language === itemLanguage.split("-")[0].toLowerCase(),
+          );
       }
     }
     if (disabledByItemLanguage) {
       ztoolkit.log("disabledByItemLanguage");
+      task.status = "fail";
+      task.result =
+        "该文献语言已设置为不自动翻译。点击翻译/重试或按 Ctrl+T 可手动翻译。";
+      if (!noDisplay) addon.api.getTemporaryRefreshHandler()();
       return false;
     }
     // Remove possible translation results (for annotations).
@@ -318,21 +364,22 @@ export class TranslationServices {
       if (!service) {
         task.result = `${task.service} is not implemented.`;
         task.status = "fail";
+        if (!noDisplay) addon.api.getTemporaryRefreshHandler()();
         return false;
       }
 
       // Run task
       const runner = new TranslateTaskRunner(service.translate);
-      await runner.run(task);
+      if (!(await runner.run(task)) || !addon.data.alive) return false;
 
       // Apply strip empty lines if enabled
       const stripEnabled = getPref("stripEmptyLines") as boolean;
-      if (stripEnabled && task.result) {
+      if (task.status === "success" && stripEnabled && task.result) {
         task.result = stripEmptyLines(task.result, true);
       }
 
       const resultRegex = getPref("resultRegex") as string;
-      if (resultRegex) {
+      if (task.status === "success" && resultRegex) {
         try {
           const regex = new RegExp(resultRegex, "g");
           // Remove all matches
@@ -340,7 +387,12 @@ export class TranslationServices {
         } catch (e) {
           ztoolkit.log("Invalid result regex", e);
           task.result = `Invalid result regex: ${resultRegex}. Please check settings > Translate > Advanced > Result Regex.`;
+          task.status = "fail";
         }
+      }
+      if (task.status === "success" && !task.result.trim()) {
+        task.status = "fail";
+        task.result = "服务未返回可用译文，请重试或切换翻译源。";
       }
 
       // Run extra tasks. Do not wait.
@@ -360,7 +412,7 @@ export class TranslationServices {
       if (task.status === "fail" && task.candidateServices.length > 0) {
         task.service = task.candidateServices.shift()!;
         task.status = "waiting";
-        return await this.runTranslationTask(task, options);
+        return await this.runTask(task, options);
       } else {
         // Display result
         if (!noDisplay) {

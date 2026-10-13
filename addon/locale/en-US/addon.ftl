@@ -44,12 +44,8 @@ service-youdaodict=Youdao Dict(en→zh)🔊
 service-freedictionaryapi=FreeDictionaryAPI(en→en)
 service-webliodict=Weblio Dict(en→ja)
 service-gramotadict=Gramota.ru(ru)
-service-errorPrefix=[Request Error]
-    Service not available, invalid secret, or request too fast.
-    Use another translation service or post the issue here: 
-    https://github.com/windingwind/zotero-pdf-translate/issues
-    
-    The message below is not Zotero or the Translate plugin, but from
+service-errorPrefix=Translation request failed
+    See the reason below, then retry or switch translation service.
 
 service-niutranspro-error-insufficient-balance=
     The current NiuTrans points balance is insufficient, so the translation request cannot be completed.
@@ -206,3 +202,7 @@ service-nllb-dialog-apistream=nllb-api Stream
 service-nllb-dialog-serveendpoint=nllb-serve EndPoint
 service-nllb-dialog-apilabel=nllb-api Docs
 service-nllb-dialog-servelabel=nllb-serve Docs
+
+reliable-setup-original-active = Translate for Zotero is still active. This customization has paused to prevent duplicate requests. Disable the original in Tools → Plugins, then re-enable this plugin or restart Zotero. The original settings are preserved.
+reliable-setup-status-unknown = The original translator's active status could not be checked. This customization has paused to prevent duplicate requests. Restart Zotero and try again. The original plugin's enabled state has not been changed.
+reliable-setup-migration-failed = Local settings migration did not finish, so this customization has paused. The original settings are unchanged. Restart Zotero and try again. Configuration contents are not written to logs.

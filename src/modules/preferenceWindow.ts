@@ -15,7 +15,7 @@ export function registerPrefsWindow() {
     pluginID: config.addonID,
     src: rootURI + "chrome/content/preferences.xhtml",
     label: getString("pref-title"),
-    image: `chrome://${config.addonRef}/content/icons/favicon.png`,
+    image: `chrome://${config.addonRef}/content/icons/reliable-translate.svg`,
     helpURL: homepage,
   });
 }

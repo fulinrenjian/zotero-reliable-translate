@@ -2,8 +2,19 @@ import { config } from "../../package.json";
 import { SVGIcon } from "../utils/config";
 import { addTranslateAnnotationTask } from "../utils/task";
 import { getString } from "../utils/locale";
+import { prewarmCnkiToken } from "./services/cnki";
 
 export function registerReaderInitializer() {
+  Zotero.Reader.registerEventListener(
+    "renderToolbar",
+    ({ reader }) => {
+      void prewarmCnkiToken(
+        reader,
+        () => addon.data.alive && Zotero.Reader._readers.includes(reader),
+      );
+    },
+    config.addonID,
+  );
   Zotero.Reader.registerEventListener(
     "renderTextSelectionPopup",
     (event) => {

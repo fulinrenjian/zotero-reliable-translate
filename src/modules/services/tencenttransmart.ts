@@ -1,5 +1,7 @@
 import type { TranslateService } from "./base";
 
+const REQUEST_TIMEOUT_MS = 8000;
+
 export const TencentTransmart: TranslateService = {
   id: "tencenttransmart",
   name: "Tencent Transmart",
@@ -33,20 +35,33 @@ export const TencentTransmart: TranslateService = {
       referer: "https://transmart.qq.com/zh-CN/index",
     };
 
-    const xhr = await Zotero.HTTP.request("POST", URL, {
-      headers,
-      body: JSON.stringify(body),
-      responseType: "json",
-    });
-    if (xhr.status !== 200) {
-      throw `Request error: ${xhr.status}`;
+    let xhr: XMLHttpRequest;
+    try {
+      xhr = await Zotero.HTTP.request("POST", URL, {
+        headers,
+        body: JSON.stringify(body),
+        responseType: "json",
+        timeout: REQUEST_TIMEOUT_MS,
+        errorDelayMax: 0,
+      });
+    } catch (error) {
+      const name = (error as { name?: string } | null)?.name;
+      if (name === "TimeoutException" || name === "TimeoutError") {
+        throw new Error("腾讯翻译君请求超时（8 秒）。请重试或切换翻译源。");
+      }
+      throw new Error("腾讯翻译君请求失败。请检查网络、重试或切换翻译源。");
     }
-    const result = xhr.response;
-    const { auto_translation } = result;
-    if (auto_translation) {
-      data.result = auto_translation.join("\n").trim();
-    } else {
-      throw JSON.stringify(result);
+    if (xhr?.status !== 200) {
+      throw new Error("腾讯翻译君服务暂不可用。请重试或切换翻译源。");
     }
+    const translated = xhr.response?.auto_translation;
+    if (
+      !Array.isArray(translated) ||
+      translated.some((part: unknown) => typeof part !== "string") ||
+      !translated.join("\n").trim()
+    ) {
+      throw new Error("腾讯翻译君未返回有效译文。请重试或切换翻译源。");
+    }
+    data.result = translated.join("\n").trim();
   },
 };

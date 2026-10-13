@@ -4,6 +4,14 @@ import { getPref } from "./prefs";
 import { getServiceSecret } from "./secret";
 import { config } from "../../package.json";
 import Addon from "../addon";
+import {
+  getTranslationTimeoutMs,
+  invalidateAllReliableTasks,
+  invalidateReliableTask,
+  publishReliableTaskProgress,
+  redactServiceError,
+  runReliableTask,
+} from "./reliableRun";
 
 export interface TranslateTask {
   /**
@@ -98,30 +106,42 @@ export type TranslateTaskProcessor = (
 
 export class TranslateError extends Error {}
 
-function maskAccessToken(token: string): string {
-  if (!token) return token;
-
-  const length = token.length;
-  if (length <= 2) return "*".repeat(length);
-
-  const visible = length <= 6 ? 1 : 3;
-  const maskedLength = length - visible * 2;
-
-  if (maskedLength <= 0) {
-    return "*".repeat(length);
-  }
-
-  return `${token.slice(0, visible)}${"*".repeat(maskedLength)}${token.slice(
-    length - visible,
-  )}`;
-}
-
 export function sanitizeTaskForLog(task: TranslateTask): TranslateTask {
   return {
     ...task,
-    ...(task.secret ? { secret: maskAccessToken(task.secret) } : {}),
+    ...(task.secret ? { secret: "[REDACTED]" } : {}),
+    result: redactServiceError(task.result || "", task.secret),
+    audio: (task.audio || []).map((audio) => ({
+      text: redactServiceError(audio.text, task.secret),
+      url: redactServiceError(audio.url, task.secret),
+    })),
     extraTasks: (task.extraTasks ?? []).map((extraTask) =>
       sanitizeTaskForLog(extraTask),
+    ) as TranslateTask["extraTasks"],
+  };
+}
+
+/** Used by the refresh API to safely publish provider stream/chunk progress. */
+export function publishTranslateTaskProgress(task: TranslateTask): boolean {
+  return publishReliableTaskProgress(task);
+}
+
+/** A cached/changed task can invalidate a provider that is still in flight. */
+export function invalidateTranslateTask(task: TranslateTask): void {
+  invalidateReliableTask(task);
+}
+
+export function invalidateAllTranslateTasks(): void {
+  invalidateAllReliableTasks();
+}
+
+function cloneTranslateTask(task: TranslateTask): TranslateTask {
+  return {
+    ...task,
+    audio: (task.audio || []).map((audio) => ({ ...audio })),
+    candidateServices: [...(task.candidateServices || [])],
+    extraTasks: (task.extraTasks || []).map(
+      cloneTranslateTask,
     ) as TranslateTask["extraTasks"],
   };
 }
@@ -155,21 +175,58 @@ export class TranslateTaskRunner {
 
     data.callerID = data.callerID || config.addonID;
 
-    data.secret = getServiceSecret(data.service);
-    data.status = "processing";
-    try {
-      ztoolkit.log(sanitizeTaskForLog(data));
-      await this.processor(data as Required<TranslateTask>);
-      data.status = "success";
-    } catch (e) {
-      if (e instanceof TranslateError) {
-        data.result = e.message;
-      } else {
-        data.result = this.makeErrorInfo(data.service, String(e));
-      }
-      data.status = "fail";
-    }
-    data.processed = true;
+    const serviceSecret = getServiceSecret(data.service);
+    // Credentials are only needed by a private provider attempt; retaining
+    // them in the public queue/API result also risks accidental UI logging.
+    delete data.secret;
+    const request = {
+      raw: data.raw,
+      service: data.service,
+      langfrom: data.langfrom,
+      langto: data.langto,
+    };
+    const timeoutMs = getTranslationTimeoutMs({
+      serviceType: addon.data.translate.services.getServiceById(data.service)
+        ?.type,
+      service: data.service,
+      raw: data.raw,
+      cnkiUseSplit: getPref("cnkiUseSplit") as boolean,
+      cnkiSplitSecond: getPref("cnkiSplitSecond") as number,
+    });
+    return await runReliableTask(
+      data,
+      (attempt) => this.processor(attempt as Required<TranslateTask>),
+      {
+        timeoutMs,
+        clone: (task) => {
+          const attempt = cloneTranslateTask(task);
+          attempt.secret = serviceSecret;
+          ztoolkit.log(sanitizeTaskForLog(attempt));
+          return attempt;
+        },
+        isTaskUnchanged: () =>
+          data.raw === request.raw &&
+          data.service === request.service &&
+          data.langfrom === request.langfrom &&
+          data.langto === request.langto,
+        // Some adapters leave this temporary placeholder on parse failure.
+        isResultValid: (result) =>
+          result.trim() !== getString("status-translating").trim(),
+        commit: (task, attempt) => {
+          task.result = redactServiceError(attempt.result, serviceSecret);
+          task.audio = attempt.audio.map((audio) => ({ ...audio }));
+        },
+        formatError: (error) => {
+          const detail = redactServiceError(
+            error instanceof Error ? error.message : String(error),
+            serviceSecret,
+          ).slice(0, 2000);
+          return error instanceof TranslateError
+            ? detail
+            : this.makeErrorInfo(request.service, detail);
+        },
+      },
+    );
   }
 
   protected makeErrorInfo(serviceId: string, detail: string) {
@@ -184,6 +241,7 @@ export function addTranslateTask(
   itemId?: number,
   type?: TranslateTask["type"],
   service?: string,
+  options: { forceNew?: boolean } = {},
 ) {
   if (!raw) {
     return;
@@ -198,6 +256,8 @@ export function addTranslateTask(
 
   // Append raw text to last task's raw if in concat mode
   const isConcatMode =
+    !service &&
+    !options.forceNew &&
     type === "text" &&
     (addon.data.translate.concatCheckbox ||
       (getPref("enableConcatKey") && addon.data.translate.concatKey));
@@ -459,11 +519,7 @@ export function autoDetectLanguage(item: Zotero.Item | null) {
         ).code;
         ztoolkit.log("try inferredLanguage", inferredLanguage);
         if (inferredLanguage) {
-          // Update language field so that it can be used in the future
           itemLanguage = inferredLanguage;
-          if (topItem.isRegularItem()) {
-            topItem.setField("language", fromLanguage);
-          }
         }
       }
       const itemLanguageMajor = itemLanguage.split("-")[0];

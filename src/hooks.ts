@@ -18,6 +18,8 @@ import {
   addTranslateTitleTask,
   getLastTranslateTask,
   TranslateTask,
+  invalidateAllTranslateTasks,
+  invalidateTranslateTask,
 } from "./utils/task";
 import { setDefaultPrefSettings } from "./modules/defaultPrefs";
 import Addon from "./addon";
@@ -26,6 +28,22 @@ import { registerExtraColumns } from "./modules/itemTree";
 import { registerShortcuts } from "./modules/shortcuts";
 import { registerItemPaneInfoRows } from "./modules/infoBox";
 import { registerCustomFields } from "./modules/fields";
+import { prepareReliableSetup } from "./modules/reliableSetup";
+import { applyReliableSpeedUpgrade } from "./modules/reliableSpeedSetup";
+import { cancelCnkiTokenWork, prewarmCnkiToken } from "./modules/services/cnki";
+import {
+  popupBindings,
+  rememberSelectionSettings,
+  selectionSettingsMatch,
+  getVisibleReaderTask,
+} from "./modules/reliablePopupBinding";
+import {
+  canReuseSelectionTask,
+  normalizeSelectionText,
+} from "./utils/reliableSelection";
+import { disposeReaderPopups } from "./modules/popup";
+
+let translationActivated = false;
 
 async function onStartup() {
   await Promise.all([
@@ -43,17 +61,27 @@ async function onStartup() {
 
   initLocale();
 
+  const setup = await prepareReliableSetup();
+  registerPrefsWindow();
+  if (!setup.shouldActivate) return;
+  translationActivated = true;
+
   setDefaultPrefSettings();
+  applyReliableSpeedUpgrade();
 
   registerCustomFields();
 
   registerReaderInitializer();
+  for (const reader of Zotero.Reader._readers) {
+    void prewarmCnkiToken(
+      reader,
+      () => addon.data.alive && Zotero.Reader._readers.includes(reader),
+    );
+  }
 
   registerShortcuts();
 
-  registerNotify(["item"]);
-
-  registerPrefsWindow();
+  registerNotify(["item", "tab"]);
 
   registerExtraColumns();
 
@@ -67,6 +95,7 @@ async function onStartup() {
 }
 
 async function onMainWindowLoad(win: Window): Promise<void> {
+  if (!translationActivated) return;
   await new Promise((resolve) => {
     if (win.document.readyState !== "complete") {
       win.document.addEventListener("readystatechange", () => {
@@ -110,6 +139,11 @@ async function onMainWindowUnload(win: Window): Promise<void> {
 }
 
 function onShutdown(): void {
+  translationActivated = false;
+  cancelCnkiTokenWork();
+  invalidateAllTranslateTasks();
+  disposeReaderPopups();
+  popupBindings.clear();
   ztoolkit.unregisterAll();
   Zotero.getMainWindows().forEach((win) => {
     onMainWindowUnload(win);
@@ -130,6 +164,7 @@ function onNotify(
   ids: Array<string | number>,
   extraData: { [key: string]: any },
 ) {
+  if (!translationActivated || !addon.data.alive) return;
   if (event === "add" && type === "item") {
     if (
       !getPref("enableAnnotationFromSyncTranslation") &&
@@ -161,7 +196,8 @@ function onPrefsLoad(event: Event) {
   registerPrefsScripts((event.target as any).ownerGlobal);
 }
 
-function onShortcuts(type: string) {
+function onShortcuts(type: string, ownerWindow?: Window) {
+  if (!translationActivated || !addon.data.alive) return;
   switch (type) {
     case "library":
       {
@@ -176,10 +212,13 @@ function onShortcuts(type: string) {
       break;
     case "reader":
       {
-        addon.hooks.onTranslate(undefined, {
-          noCheckZoteroItemLanguage: true,
-          noCache: true,
-        });
+        const task = getVisibleReaderTask(ownerWindow);
+        if (task) {
+          addon.hooks.onTranslate(task, {
+            noCheckZoteroItemLanguage: true,
+            noCache: true,
+          });
+        }
       }
       break;
     default:
@@ -212,7 +251,22 @@ async function onTranslate(...data: any) {
     task = data[0];
     options = data[1];
   }
-  await addon.data.translate.services.runTranslationTask(task, options);
+  task = task || getVisibleReaderTask() || getLastTranslateTask();
+  // Repeated shortcut/button presses share the ongoing attempt.
+  if (
+    !addon.data.alive ||
+    !translationActivated ||
+    !task ||
+    task.status === "processing"
+  )
+    return;
+  try {
+    await addon.data.translate.services.runTranslationTask(task, options);
+  } catch (_error) {
+    task.status = "fail";
+    task.result = "翻译未完成，请点击重试或切换翻译源。";
+    addon.hooks.onReaderPopupRefresh();
+  }
 }
 
 async function onTranslateInBatch(
@@ -231,17 +285,51 @@ function onReaderPopupShow(
   event: _ZoteroTypes.Reader.EventParams<"renderTextSelectionPopup">,
 ) {
   const selection = addon.data.translate.selectedText;
-  const task = getLastTranslateTask();
-  if (task?.raw === selection) {
-    buildReaderPopup(event);
-    addon.hooks.onReaderPopupRefresh();
-    return;
+  const readerKey = String(event.reader._instanceID);
+  const current = popupBindings.getCurrentTask(readerKey);
+  const same = popupBindings.findSame(
+    readerKey,
+    selection,
+    event.reader.itemID,
+  );
+  const previous =
+    same &&
+    normalizeSelectionText(same.raw) === normalizeSelectionText(selection)
+      ? same
+      : undefined;
+  const concat =
+    addon.data.translate.concatCheckbox ||
+    (getPref("enableConcatKey") && addon.data.translate.concatKey);
+  const reuse =
+    previous &&
+    !concat &&
+    selectionSettingsMatch(previous) &&
+    (canReuseSelectionTask(previous) ||
+      (previous.status === "waiting" && !getPref("enableAuto")));
+  if (current?.status === "processing" && !reuse) {
+    invalidateTranslateTask(current);
+    current.status = "fail";
+    current.result = "选区已更换，原请求已停止。重新选择或点击重试可再次翻译。";
   }
-  addTranslateTask(selection, event.reader.itemID);
-  buildReaderPopup(event);
+  const joined =
+    concat && current && current.itemId === event.reader.itemID
+      ? `${current.raw} ${selection}`
+      : selection;
+  let task = reuse
+    ? previous
+    : addTranslateTask(
+        normalizeSelectionText(joined),
+        event.reader.itemID,
+        "text",
+        undefined,
+        { forceNew: true },
+      );
+  if (!task) return;
+  if (!reuse) rememberSelectionSettings(task);
+  buildReaderPopup(event, task);
   addon.hooks.onReaderPopupRefresh();
-  if (getPref("enableAuto")) {
-    addon.hooks.onTranslate();
+  if (!reuse && getPref("enableAuto")) {
+    addon.hooks.onTranslate(task);
   }
 }
 

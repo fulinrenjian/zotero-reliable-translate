@@ -1,7 +1,8 @@
 import { getLocaleID } from "../utils/locale";
 import { config } from "../../package.json";
 import { getPref, setPref } from "../utils/prefs";
-import { getLastTranslateTask } from "../utils/task";
+import type { TranslateTask } from "../utils/task";
+import { getVisibleReaderTask } from "./reliablePopupBinding";
 import { TranslatorPanel } from "../elements/panel";
 import { isWindowAlive } from "../utils/window";
 import { services } from "./services";
@@ -22,14 +23,19 @@ export function registerReaderTabPanel() {
       // @ts-ignore
       orderable: false,
     },
-    bodyXHTML: "<translator-plugin-panel />",
+    bodyXHTML: `<${config.addonRef}-panel />`,
     onInit,
     onDestroy,
     onRender: ({ body, item }) => {
       const panel = body.querySelector(
-        "translator-plugin-panel",
+        `${config.addonRef}-panel`,
       ) as TranslatorPanel;
       panel.item = item;
+      const reader = readerForPanel(body);
+      panel.setReaderContext(
+        reader ? String(reader._instanceID) : undefined,
+        reader?.itemID,
+      );
       panel.render();
       onUpdateHeight({ body });
     },
@@ -39,8 +45,11 @@ export function registerReaderTabPanel() {
         type: "openStandalone",
         icon: "chrome://zotero/skin/16/universal/open-link.svg",
         l10nID: getLocaleID("itemPaneSection-openStandalone"),
-        onClick: ({ event }) => {
-          openWindowPanel();
+        onClick: ({ body }) => {
+          const panel = body.querySelector(
+            `${config.addonRef}-panel`,
+          ) as TranslatorPanel | null;
+          openWindowPanel(panel?.getTask());
         },
       },
       {
@@ -59,7 +68,39 @@ export function registerReaderTabPanel() {
   if (key) paneKey = key;
 }
 
-async function openWindowPanel() {
+function readerForPanel(body: HTMLElement) {
+  const details = body.closest("item-details") as
+    | (HTMLElement & { tabID?: string })
+    | null;
+  if (details?.tabID) return Zotero.Reader.getByTabID(details.tabID);
+  // Independent PDF windows have no Zotero_Tabs, but the native ReaderWindow
+  // owns the same XUL window as this body. Verified on Zotero 10.0.x.
+  const readers = (
+    Zotero.Reader as unknown as {
+      _readers: {
+        _instanceID: string;
+        itemID: number;
+        tabID?: string;
+        _window?: Window;
+      }[];
+    }
+  )._readers;
+  return readers?.find(
+    (reader) =>
+      !reader.tabID && reader._window === body.ownerDocument.defaultView,
+  );
+}
+
+async function openWindowPanel(initialTask?: TranslateTask) {
+  const previousWindow = addon.data.panel.windowPanel;
+  const previousPanel =
+    previousWindow && !previousWindow.closed
+      ? (previousWindow.document.querySelector(
+          `${config.addonRef}-panel`,
+        ) as TranslatorPanel | null)
+      : null;
+  const task =
+    initialTask || previousPanel?.getTask() || getVisibleReaderTask();
   if (addon.data.panel.windowPanel && !addon.data.panel.windowPanel.closed) {
     addon.data.panel.windowPanel.close();
   }
@@ -75,6 +116,10 @@ async function openWindowPanel() {
     dialogData,
   )!;
   await dialogData.loadLock.promise;
+  const panel = win.document.querySelector(
+    `${config.addonRef}-panel`,
+  ) as TranslatorPanel | null;
+  panel?.adoptTask(task);
   buildExtraPanel(win.document);
   updateExtraPanel(win.document);
   addon.data.panel.windowPanel = win;
@@ -258,10 +303,10 @@ function onItemChange({
 }
 
 function updateExtraPanel(container: HTMLElement | Document) {
-  const lastTask = getLastTranslateTask();
   const panel = container.querySelector(
-    "translator-plugin-panel",
+    `${config.addonRef}-panel`,
   ) as TranslatorPanel;
+  const lastTask = panel?.getTask();
   if (panel) {
     panel.item = Zotero.Items.get(lastTask?.itemId || -1);
     panel.render();

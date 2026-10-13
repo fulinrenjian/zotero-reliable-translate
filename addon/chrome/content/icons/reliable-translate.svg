@@ -1,0 +1,22 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 96 96"
+  width="96"
+  height="96"
+  role="img"
+  aria-label="Reliable Translate"
+>
+  <rect x="4" y="4" width="88" height="88" rx="22" fill="#245FBD" />
+  <path
+    d="M23 25h45a7 7 0 0 1 7 7v26a7 7 0 0 1-7 7H42L27 77V65h-4a7 7 0 0 1-7-7V32a7 7 0 0 1 7-7Z"
+    fill="#fff"
+  />
+  <path
+    d="M30 52V37h8a5 5 0 0 1 0 10h-8m8 0 7 7m7-16h13m-6.5 0v16"
+    fill="none"
+    stroke="#245FBD"
+    stroke-width="4"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>

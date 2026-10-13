@@ -6,18 +6,94 @@ import {
   addTranslateTask,
   autoDetectLanguage,
   getLastTranslateTask,
-  putTranslateTaskAtHead,
+  invalidateTranslateTask,
+  TranslateTask,
 } from "../utils/task";
 import type { TranslationServices } from "../modules/services";
-
-//@ts-expect-error addon instance not typed
-const services = Zotero[config.addonInstance].data.translate
-  .services as TranslationServices;
+import { popupBindings } from "../modules/reliablePopupBinding";
 
 export class TranslatorPanel extends PluginCEBase {
   _item: Zotero.Item | null = null;
 
   _taskID = "";
+  private readerKey?: string;
+  private readerItemID?: number;
+  private selectionTaskID = "";
+  private ownedTask?: TranslateTask;
+
+  private get services(): TranslationServices {
+    // Resolve the current addon instance instead of capturing the first
+    // instance in a custom element constructor that may survive a hot reload.
+    return this._addon.data.translate.services;
+  }
+
+  setReaderContext(readerKey?: string, itemID?: number): void {
+    if (this.readerKey !== readerKey || this.readerItemID !== itemID) {
+      this.ownedTask = undefined;
+      this._taskID = "";
+      this.selectionTaskID = "";
+    }
+    this.readerKey = readerKey;
+    this.readerItemID = itemID;
+  }
+
+  /** Standalone windows adopt a task once; subsequent global tasks cannot steal it. */
+  adoptTask(task?: TranslateTask): void {
+    this.ownedTask = task;
+    this._taskID = task?.id || "";
+  }
+
+  /** Reader selections can replace manual text only when this reader selects anew. */
+  getTask(): TranslateTask | undefined {
+    const selection = this.readerKey
+      ? popupBindings.getCurrentTask(this.readerKey)
+      : undefined;
+    if (selection && selection.id !== this.selectionTaskID) {
+      this.selectionTaskID = selection.id;
+      this.adoptTask(selection);
+    }
+    return (
+      this.ownedTask ||
+      (this._taskID ? getLastTranslateTask({ id: this._taskID }) : undefined)
+    );
+  }
+
+  private replaceTask(
+    raw: string,
+    service?: string,
+  ): TranslateTask | undefined {
+    const previous = this.getTask();
+    const task = addTranslateTask(
+      raw || " ",
+      this.readerItemID ?? this.item?.id,
+      "text",
+      service || previous?.service || String(getPref("translateSource")),
+    );
+    if (!task) return undefined;
+    task.raw = raw;
+    task.langfrom =
+      (this._queryID("langfrom") as XUL.MenuList)?.value ||
+      String(getPref("sourceLanguage"));
+    task.langto =
+      (this._queryID("langto") as XUL.MenuList)?.value ||
+      String(getPref("targetLanguage"));
+    if (previous?.status === "processing") {
+      invalidateTranslateTask(previous);
+      previous.status = "fail";
+      previous.result = "文本或翻译设置已更新，请使用当前任务继续翻译。";
+    }
+    this.adoptTask(task);
+    return task;
+  }
+
+  private setManualResult(value: string): void {
+    const task = this.getTask() || this.replaceTask("");
+    if (!task) return;
+    if (task.status === "processing") invalidateTranslateTask(task);
+    task.result = value;
+    task.status = value.trim() ? "success" : "waiting";
+    task.processed = true;
+  }
 
   get item() {
     return this._item;
@@ -40,10 +116,10 @@ export class TranslatorPanel extends PluginCEBase {
 <hbox id="engine" align="center">
   <menulist id="services" native="true">
     <menupopup>
-      ${services
-        .getAllServicesWithType("sentence")
+      ${this.services
+        .getAllServices()
         .map((service) => {
-          const customName = services.getServiceNameByID(service.id);
+          const customName = this.services.getServiceNameByID(service.id);
           return `<menuitem label="${customName}" value="${service.id}" />`;
         })
         .join("\n")}
@@ -68,7 +144,7 @@ export class TranslatorPanel extends PluginCEBase {
 <html:div id="text-container" class="editor-container">
   ${
     (getPref("enableMathRendering") as boolean)
-      ? `<math-textbox id="raw-text"></math-textbox>`
+      ? `<${config.addonRef}-math-textbox id="raw-text"></${config.addonRef}-math-textbox>`
       : `<editable-text id="raw-text" multiline="true" />`
   }
   <html:div id="resizer" class="draggable-container">
@@ -76,7 +152,7 @@ export class TranslatorPanel extends PluginCEBase {
   </html:div>
   ${
     (getPref("enableMathRendering") as boolean)
-      ? `<math-textbox id="result-text"></math-textbox>`
+      ? `<${config.addonRef}-math-textbox id="result-text"></${config.addonRef}-math-textbox>`
       : `<editable-text id="result-text" multiline="true" />`
   }
 </html:div>
@@ -113,30 +189,37 @@ export class TranslatorPanel extends PluginCEBase {
     // Services
     this._queryID("services")?.addEventListener("command", (e) => {
       const newService = (e.target as XUL.MenuList).value;
-      setPref("translateSource", newService);
-      this._addon.hooks.onReaderTabPanelRefresh();
-      const data = getLastTranslateTask();
-      if (!data) {
-        return;
-      }
-      data.service = newService;
-      this._addon.hooks.onTranslate(undefined, {
+      setPref(
+        this.services.getServiceById(newService)?.type === "word"
+          ? "dictSource"
+          : "translateSource",
+        newService,
+      );
+      const previous = this.getTask();
+      if (!previous) return;
+      const task = this.replaceTask(previous.raw, newService);
+      if (!task?.raw.trim()) return;
+      this._addon.hooks.onTranslate(task, {
         noCheckZoteroItemLanguage: true,
+        noCache: true,
       });
+      this._addon.hooks.onReaderTabPanelRefresh();
     });
 
     // Translate
     this._queryID("translate")?.addEventListener("command", () => {
-      if (!getLastTranslateTask()) {
-        addTranslateTask(
-          (
-            this._queryID(
-              getPref("rawResultOrder") ? "result-text" : "raw-text",
-            ) as HTMLTextAreaElement
-          )?.value,
-        );
-      }
-      this._addon.hooks.onTranslate(undefined, {
+      const raw =
+        (
+          this._queryID(
+            getPref("rawResultOrder") ? "result-text" : "raw-text",
+          ) as HTMLTextAreaElement
+        )?.value || "";
+      let task = this.getTask();
+      if (task?.status === "processing" && task.raw === raw) return;
+      if (!task || task.raw !== raw || task.processed)
+        task = this.replaceTask(raw);
+      if (!task?.raw.trim() || task.status === "processing") return;
+      this._addon.hooks.onTranslate(task, {
         noCheckZoteroItemLanguage: true,
         noCache: true,
       });
@@ -146,11 +229,13 @@ export class TranslatorPanel extends PluginCEBase {
     this._queryID("langfrom")?.addEventListener("command", (e) => {
       const newValue = (e.target as XUL.MenuList).value;
       setPref("sourceLanguage", newValue);
-      const itemID = this.item?.id;
+      const itemID = this.readerItemID ?? this.item?.id;
       if (itemID) {
         this._addon.data.translate.cachedSourceLanguage[Number(itemID)] =
           newValue;
       }
+      const task = this.getTask();
+      if (task) this.replaceTask(task.raw);
       this._addon.hooks.onReaderTabPanelRefresh();
     });
 
@@ -159,61 +244,37 @@ export class TranslatorPanel extends PluginCEBase {
       const langto = getPref("targetLanguage") as string;
       setPref("targetLanguage", langfrom);
       setPref("sourceLanguage", langto);
+      (this._queryID("langfrom") as XUL.MenuList).value = langto;
+      (this._queryID("langto") as XUL.MenuList).value = langfrom;
+      const task = this.getTask();
+      if (task) this.replaceTask(task.raw);
       this._addon.hooks.onReaderTabPanelRefresh();
     });
 
     this._queryID("langto")?.addEventListener("command", (e) => {
       setPref("targetLanguage", (e.target as XUL.MenuList).value);
+      const task = this.getTask();
+      if (task) this.replaceTask(task.raw);
       this._addon.hooks.onReaderTabPanelRefresh();
     });
 
     // Text change
     this._queryID("raw-text")?.addEventListener("input", (e) => {
-      let task = getLastTranslateTask({
-        id: this._taskID,
-      });
-      if (!task) {
-        task = addTranslateTask(
-          (e.target as HTMLTextAreaElement).value,
-          this.item?.id,
-          "text",
-        );
-        if (task) this._taskID = task.id;
-      }
-      if (!task) {
-        return;
-      }
       const reverseRawResult = getPref("rawResultOrder");
       if (!reverseRawResult) {
-        task.raw = (e.target as HTMLTextAreaElement).value;
+        this.replaceTask((e.target as HTMLTextAreaElement).value);
       } else {
-        task.result = (e.target as HTMLTextAreaElement).value;
+        this.setManualResult((e.target as HTMLTextAreaElement).value);
       }
-      putTranslateTaskAtHead(task.id);
     });
 
     this._queryID("result-text")?.addEventListener("input", (e) => {
-      let task = getLastTranslateTask({
-        id: this._taskID,
-      });
-      if (!task) {
-        task = addTranslateTask(
-          (e.target as HTMLTextAreaElement).value,
-          this.item?.id,
-          "text",
-        );
-        if (task) this._taskID = task.id;
-      }
-      if (!task) {
-        return;
-      }
       const reverseRawResult = getPref("rawResultOrder");
       if (!reverseRawResult) {
-        task.result = (e.target as HTMLTextAreaElement).value;
+        this.setManualResult((e.target as HTMLTextAreaElement).value);
       } else {
-        task.raw = (e.target as HTMLTextAreaElement).value;
+        this.replaceTask((e.target as HTMLTextAreaElement).value);
       }
-      putTranslateTaskAtHead(task.id);
     });
 
     // Auto translate
@@ -236,22 +297,13 @@ export class TranslatorPanel extends PluginCEBase {
     });
 
     this._queryID("clear-concat")?.addEventListener("command", () => {
-      const task = getLastTranslateTask();
-      if (task) {
-        task.raw = "";
-        task.result = "";
-        task.extraTasks.forEach((t) => {
-          t.result = "";
-        });
-        this._addon.hooks.onReaderTabPanelRefresh();
-      }
+      this.replaceTask("");
+      this._addon.hooks.onReaderTabPanelRefresh();
     });
 
     // Copy
     this._queryID("copy-raw")?.addEventListener("command", () => {
-      const task = getLastTranslateTask({
-        id: this._taskID,
-      });
+      const task = this.getTask();
       if (!task) {
         return;
       }
@@ -261,9 +313,7 @@ export class TranslatorPanel extends PluginCEBase {
     });
 
     this._queryID("copy-result")?.addEventListener("command", () => {
-      const task = getLastTranslateTask({
-        id: this._taskID,
-      });
+      const task = this.getTask();
       if (!task) {
         return;
       }
@@ -273,9 +323,7 @@ export class TranslatorPanel extends PluginCEBase {
     });
 
     this._queryID("copy-both")?.addEventListener("command", () => {
-      const task = getLastTranslateTask({
-        id: this._taskID,
-      });
+      const task = this.getTask();
       if (!task) {
         return;
       }
@@ -355,7 +403,7 @@ export class TranslatorPanel extends PluginCEBase {
     const menuItems = menuPopup.querySelectorAll("menuitem");
     const hideUnconfigured = getPref("hideUnconfiguredServices") as boolean;
     const unconfiguredIds = hideUnconfigured
-      ? services.getUnconfiguredServiceIds()
+      ? this.services.getUnconfiguredServiceIds()
       : null;
 
     menuItems.forEach((item) => {
@@ -404,11 +452,15 @@ export class TranslatorPanel extends PluginCEBase {
     // Filter unconfigured services from dropdown if preference is enabled
     this._filterUnconfiguredServices();
 
-    setValue("services", getPref("translateSource") as string);
+    const lastTask = this.getTask();
+    setValue(
+      "services",
+      lastTask?.service || String(getPref("translateSource")),
+    );
 
     const { fromLanguage, toLanguage } = autoDetectLanguage(this.item);
-    setValue("langfrom", fromLanguage);
-    setValue("langto", toLanguage);
+    setValue("langfrom", lastTask?.langfrom || fromLanguage);
+    setValue("langto", lastTask?.langto || toLanguage);
 
     setCheckBox("auto-trans-selection", getPref("enableAuto") as boolean);
     setCheckBox("auto-trans-annotation", getPref("enableComment") as boolean);
@@ -426,8 +478,9 @@ export class TranslatorPanel extends PluginCEBase {
       reverseRawResult ? "Select or type to translate" : "",
     );
 
-    const lastTask = getLastTranslateTask();
     if (!lastTask) {
+      setValue("raw-text", "");
+      setValue("result-text", "");
       return;
     }
     // For manually update translation task

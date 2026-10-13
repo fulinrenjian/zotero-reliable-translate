@@ -1,0 +1,1114 @@
+THIRD-PARTY NOTICES FOR RELIABLE TRANSLATE
+Prepared: 2026-10-13
+
+Scope
+-----
+These notices cover the eight npm packages present in the generated runtime JS
+bundles, their nested JSEncrypt code, and the twenty redistributed KaTeX fonts.
+The main modified plugin remains under AGPL-3.0-or-later; see LICENSE.txt and
+NOTICE.txt for upstream attribution. Each original component retains its own
+license. The preserved text below is not replaced by the plugin's AGPL notice.
+
+Runtime package inventory
+-------------------------
+  collapse-white-space@2.1.0 - https://github.com/wooorm/collapse-white-space/tree/728911c098ddc70e6500cbdded13899e419c2f1f
+  franc@6.2.0 - https://github.com/wooorm/franc/tree/612ed4fe777a5b16383efad367c57a359feb78ed
+  iso639-js@1.1.3 - https://registry.npmjs.org/iso639-js/1.1.3
+  jsencrypt@3.5.4 - https://github.com/travist/jsencrypt/tree/a0ae319f4011d90ec7dc15192c0f7be1f3946ee0
+  katex@0.16.25 - https://github.com/KaTeX/KaTeX/tree/d2f1084c5ecca7c47295de52728e0c5f565b12ec
+  n-gram@2.0.2 - https://github.com/words/n-gram/tree/4533b691a4cbd39c58538a89f17d25c5bf6f5aa3
+  trigram-utils@2.0.1 - https://github.com/wooorm/trigram-utils/tree/ea7788294bcaef39c7ae7aa94bf412885e5d6edf
+  zotero-plugin-toolkit@6.0.0 - https://github.com/windingwind/zotero-plugin-toolkit/tree/0fbfd0258921044de1854b89d66b27762b10ee0a
+
+Build/test dependencies (not runtime code in the reviewed bundles)
+----------------------------------------------------------------
+  @eslint/js@9.39.1 (MIT)
+  @types/chai@5.2.3 (MIT)
+  @types/mocha@10.0.10 (MIT)
+  @types/node@22.18.1 (MIT)
+  chokidar-cli@3.0.0 (MIT)
+  concurrently@9.2.1 (MIT)
+  cross-env@10.1.0 (MIT)
+  eslint@9.39.1 (MIT)
+  husky@9.1.7 (MIT)
+  lint-staged@16.2.7 (MIT)
+  prettier@3.7.4 (MIT)
+  typescript@5.9.3 (Apache-2.0)
+  typescript-eslint@8.48.1 (MIT)
+  zotero-plugin-scaffold@0.8.2 (AGPL-3.0-or-later)
+  zotero-types@4.1.0-beta.3 (MIT)
+These development tools and their transitive dependencies are installed from
+package-lock.json, are not included as node_modules in the release source ZIP,
+and are not covered by this runtime notice inventory. A distribution that also
+ships those development packages must preserve their respective notices.
+
+Source availability
+-------------------
+The release source should include vendor-sources/SOURCE-MANIFEST.json and the
+seven complete upstream repository archives plus the exact iso639-js 1.1.3
+npm archive identified there. Six repository archives use verified npm gitHead;
+franc uses its official 6.2.0 tag with matching preferred source files. iso639-js
+uses its integrity-checked official npm archive because its gitHead is unavailable.
+KaTeX's complete repository includes src/fonts and dockers/fonts; font hashes
+are checked against the exact KaTeX 0.16.25 npm distribution. Do not execute
+third-party archive contents simply to inspect them.
+
+Specific provenance limits
+--------------------------
+- iso639-js 1.1.3 declares license: ISC and author: Mikhail Labanov in its
+  original package.json. The upstream npm package and repository do not supply
+  a separate copyright/license file. No year or copyright statement has been
+  invented here. The full standard ISC license text is reproduced, including
+  its unfilled standard copyright placeholders. The author information above
+  is package metadata, not a fabricated copyright header. Its README credits
+  SIL, Wikipedia and other sources for data; that alone is not a complete
+  data-rights provenance record.
+- JSEncrypt supplies the full license texts for its own code, jsrsasign, jsbn
+  and asn1js. Its bundled source has additional year-specific copyright notices
+  reproduced below. SHA-256 version 2.2 additionally identifies a BSD license;
+  that complete text was obtained from Paul Johnston's linked official site.
+- JSEncrypt's jsrsasign notice says it contains YUI code but does not identify
+  the original YUI version. The full BSD text below is preserved from YUI's
+  official license file; the exact inherited YUI version remains unidentified.
+- All twenty KaTeX .woff2 assets match KaTeX 0.16.25 exactly by SHA-256. The
+  separate katex-fonts MIT notice is also retained from its official repository.
+- KaTeX font-generation Makefile preserves MathJax Apache-2.0 copyright
+  notices. Its xbbold.mf preserves the American Mathematical Society
+  copyright and OFL-1.1 notice, including the upstream font modification
+  statement. These specific licenses supplement, rather than disappear under,
+  the KaTeX repository MIT license. Complete Apache-2.0 and OFL-1.1 texts follow.
+  Rebuilding fonts also needs external TeX Live fonts and system build tools
+  listed by the original Dockerfile; those system packages are not bundled.
+- Upstream plugin images, logos, SVG icons, screenshots and third-party service
+  access permissions are outside this runtime dependency inventory. These
+  notices do not assert endorsement, trademark permission or service access
+  authorization.
+
+Original license texts and copyright notices
+===========================================
+
+==============================================================================
+collapse-white-space 2.1.0
+Version: 2.1.0
+Source: https://github.com/wooorm/collapse-white-space/tree/728911c098ddc70e6500cbdded13899e419c2f1f
+Original npm metadata: https://registry.npmjs.org/collapse-white-space/2.1.0
+License text origin: node_modules/collapse-white-space/license
+Snapshot file: licenses/collapse-white-space-2.1.0.txt
+Snapshot SHA-256: 63cb98b3f6abfb3c3592c16f88253c1bdc834087bf52671e8ce5609e4eb693cf
+------------------------------------------------------------------------------
+(The MIT License)
+
+Copyright (c) 2015 Titus Wormer <tituswormer@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+==============================================================================
+franc 6.2.0
+Version: 6.2.0
+Source: https://github.com/wooorm/franc/tree/612ed4fe777a5b16383efad367c57a359feb78ed
+Original npm metadata: https://registry.npmjs.org/franc/6.2.0
+License text origin: https://raw.githubusercontent.com/wooorm/franc/6.2.0/license
+Snapshot file: licenses/franc-6.2.0.txt
+Snapshot SHA-256: f5e0c5c44706ddda7ac2f9096f848222f1e0e90f88643955041c2735be84592b
+------------------------------------------------------------------------------
+(The MIT License)
+
+Copyright (c) 2014 Titus Wormer <tituswormer@gmail.com>
+Copyright (c) 2008 Kent S Johnson
+Copyright (c) 2006 Jacob R Rideout <kde@jacobrideout.net>
+Copyright (c) 2004 Maciej Ceglowski
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+==============================================================================
+iso639-js 1.1.3
+Version: 1.1.3
+Source: https://registry.npmjs.org/iso639-js/1.1.3
+Original npm metadata: https://registry.npmjs.org/iso639-js/1.1.3
+License text origin: https://raw.githubusercontent.com/spdx/license-list-data/main/text/ISC.txt (standard full text; upstream declares ISC in package.json)
+Snapshot file: licenses/ISC-standard.txt
+Snapshot SHA-256: 521c6f0ed8e64736684f89843d16a4df6b4b7449acbcfc6ca6630a3037ca8c53
+------------------------------------------------------------------------------
+ISC License
+
+Copyright <year> <owner> 
+
+Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+==============================================================================
+jsencrypt 3.5.4
+Version: 3.5.4
+Source: https://github.com/travist/jsencrypt/tree/a0ae319f4011d90ec7dc15192c0f7be1f3946ee0
+Original npm metadata: https://registry.npmjs.org/jsencrypt/3.5.4
+License text origin: node_modules/jsencrypt/LICENSE.txt
+Snapshot file: licenses/jsencrypt-3.5.4.txt
+Snapshot SHA-256: a90724b4807f3d518313f8780404f881410ec0450dc1168ed0c3e8388d45de4a
+------------------------------------------------------------------------------
+File: /src/LICENSE.txt
+The MIT License (MIT)
+Copyright (c) 2015 Form.io
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in the
+Software without restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the
+Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+File: /lib/jsrsasign/LICENSE.txt
+
+
+CONTAINS CODE FROM YUI LIBRARY SEE LICENSE @ http://yuilibrary.com/license/
+
+The 'jsrsasign'(RSA-Sign JavaScript Library) License
+
+Copyright (c) 2010-2013 Kenji Urushima
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+File: /lib/jsbn/LICENSE.txt
+
+
+Licensing
+---------
+
+This software is covered under the following copyright:
+
+/*
+ * Copyright (c) 2003-2005  Tom Wu
+ * All Rights Reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY
+ * WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * IN NO EVENT SHALL TOM WU BE LIABLE FOR ANY SPECIAL, INCIDENTAL,
+ * INDIRECT OR CONSEQUENTIAL DAMAGES OF ANY KIND, OR ANY DAMAGES WHATSOEVER
+ * RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER OR NOT ADVISED OF
+ * THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF LIABILITY, ARISING OUT
+ * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ *
+ * In addition, the following condition applies:
+ *
+ * All redistributions must retain an intact copy of this copyright notice
+ * and disclaimer.
+ */
+
+Address all questions regarding this license to:
+
+  Tom Wu
+  tjw@cs.Stanford.EDU
+File: /lib/asn1js/LICENSE.txt
+
+
+ASN.1 JavaScript decoder
+Copyright (c) 2008-2013 Lapo Luchini <lapo@lapo.it>
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+==============================================================================
+katex 0.16.25
+Version: 0.16.25
+Source: https://github.com/KaTeX/KaTeX/tree/d2f1084c5ecca7c47295de52728e0c5f565b12ec
+Original npm metadata: https://registry.npmjs.org/katex/0.16.25
+License text origin: node_modules/katex/LICENSE
+Snapshot file: licenses/katex-0.16.25.txt
+Snapshot SHA-256: 766ccc1f306c885aa45542a9846bbd0a505b27a0374f146778171c2254ce18e3
+------------------------------------------------------------------------------
+The MIT License (MIT)
+
+Copyright (c) 2013-2020 Khan Academy and other contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+==============================================================================
+n-gram 2.0.2
+Version: 2.0.2
+Source: https://github.com/words/n-gram/tree/4533b691a4cbd39c58538a89f17d25c5bf6f5aa3
+Original npm metadata: https://registry.npmjs.org/n-gram/2.0.2
+License text origin: node_modules/n-gram/license
+Snapshot file: licenses/n-gram-2.0.2.txt
+Snapshot SHA-256: 9966260ba3ea9d6a5f839297dca80ddc99735a34b4ae82811cac7b956d2e3afd
+------------------------------------------------------------------------------
+(The MIT License)
+
+Copyright (c) 2014 Titus Wormer <tituswormer@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+==============================================================================
+trigram-utils 2.0.1
+Version: 2.0.1
+Source: https://github.com/wooorm/trigram-utils/tree/ea7788294bcaef39c7ae7aa94bf412885e5d6edf
+Original npm metadata: https://registry.npmjs.org/trigram-utils/2.0.1
+License text origin: node_modules/trigram-utils/license
+Snapshot file: licenses/trigram-utils-2.0.1.txt
+Snapshot SHA-256: 9966260ba3ea9d6a5f839297dca80ddc99735a34b4ae82811cac7b956d2e3afd
+------------------------------------------------------------------------------
+(The MIT License)
+
+Copyright (c) 2014 Titus Wormer <tituswormer@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+==============================================================================
+zotero-plugin-toolkit 6.0.0
+Version: 6.0.0
+Source: https://github.com/windingwind/zotero-plugin-toolkit/tree/0fbfd0258921044de1854b89d66b27762b10ee0a
+Original npm metadata: https://registry.npmjs.org/zotero-plugin-toolkit/6.0.0
+License text origin: node_modules/zotero-plugin-toolkit/LICENSE
+Snapshot file: licenses/zotero-plugin-toolkit-6.0.0.txt
+Snapshot SHA-256: e4b2fd9c6a30472d5d0eca334a8b49ae31376245cf5bae0861cf94106259aadf
+------------------------------------------------------------------------------
+The MIT License (MIT)
+Copyright © 2022 <copyright windingwind>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+==============================================================================
+JSEncrypt 3.5.4 embedded source copyright/license headers
+Origin: exact leading comments in the installed upstream source files.
+The following header notices supplement, and do not replace, JSEncrypt's full
+aggregate LICENSE.txt reproduced above.
+Snapshot file: licenses/jsencrypt-3.5.4-original-source-headers.txt
+Snapshot SHA-256: 64b2203c2c00e3246791c1074d3bc7c11f7fe9a47540781c152238a335d956ec
+------------------------------------------------------------------------------
+File: jsencrypt/lib/lib/asn1js/asn1.js
+// ASN.1 JavaScript decoder
+// Copyright (c) 2008-2014 Lapo Luchini <lapo@lapo.it>
+// Permission to use, copy, modify, and/or distribute this software for any
+// purpose with or without fee is hereby granted, provided that the above
+// copyright notice and this permission notice appear in all copies.
+//
+// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+// ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+// ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+// OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+/*jshint browser: true, strict: true, immed: true, latedef: true, undef: true, regexdash: false */
+/*global oids */
+
+File: jsencrypt/lib/lib/asn1js/base64.js
+// Base64 JavaScript decoder
+// Copyright (c) 2008-2013 Lapo Luchini <lapo@lapo.it>
+// Permission to use, copy, modify, and/or distribute this software for any
+// purpose with or without fee is hereby granted, provided that the above
+// copyright notice and this permission notice appear in all copies.
+//
+// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+// ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+// ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+// OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+/*jshint browser: true, strict: true, immed: true, latedef: true, undef: true, regexdash: false */
+
+File: jsencrypt/lib/lib/asn1js/hex.js
+// Hex JavaScript decoder
+// Copyright (c) 2008-2013 Lapo Luchini <lapo@lapo.it>
+// Permission to use, copy, modify, and/or distribute this software for any
+// purpose with or without fee is hereby granted, provided that the above
+// copyright notice and this permission notice appear in all copies.
+//
+// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+// ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+// ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+// OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+/*jshint browser: true, strict: true, immed: true, latedef: true, undef: true, regexdash: false */
+
+File: jsencrypt/lib/lib/asn1js/int10.js
+// Big integer base-10 printing library
+// Copyright (c) 2014 Lapo Luchini <lapo@lapo.it>
+// Permission to use, copy, modify, and/or distribute this software for any
+// purpose with or without fee is hereby granted, provided that the above
+// copyright notice and this permission notice appear in all copies.
+//
+// THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+// WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+// MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+// ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+// WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+// ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+// OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+/*jshint browser: true, strict: true, immed: true, latedef: true, undef: true, regexdash: false */
+
+File: jsencrypt/lib/lib/jsbn/jsbn.js
+// Copyright (c) 2005  Tom Wu
+// All Rights Reserved.
+// See "LICENSE" for details.
+// Basic JavaScript BN library - subset useful for RSA encryption.
+
+File: jsencrypt/lib/lib/jsbn/sha256.js
+/*
+ * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
+ * in FIPS 180-2
+ * Version 2.2 Copyright Angel Marin, Paul Johnston 2000 - 2009.
+ * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
+ * Distributed under the BSD License
+ * See http://pajhome.org.uk/crypt/md5 for details.
+ * Also http://anmar.eu.org/projects/jssha2/
+ */
+// /*
+//  * Configurable variables. You may need to tweak these to be compatible with
+//  * the server-side, but the defaults work in most cases.
+//  */
+// var hexcase = 0; /* hex output format. 0 - lowercase; 1 - uppercase        */
+// var b64pad = ""; /* base-64 pad character. "=" for strict RFC compliance   */
+// /*
+//  * These are the functions you'll usually want to call
+//  * They take string arguments and return either hex or base-64 encoded strings
+//  */
+// function hex_sha256(s: string) {
+//     return rstr2hex(rstr_sha256(str2rstr_utf8(s)));
+// }
+// function b64_sha256(s: string) {
+//     return rstr2b64(rstr_sha256(str2rstr_utf8(s)));
+// }
+// function any_sha256(s: string, e: any) {
+//     return rstr2any(rstr_sha256(str2rstr_utf8(s)), e);
+// }
+// function hex_hmac_sha256(k: string, d: any) {
+//     return rstr2hex(rstr_hmac_sha256(str2rstr_utf8(k), str2rstr_utf8(d)));
+// }
+// function b64_hmac_sha256(k: string, d: any) {
+//     return rstr2b64(rstr_hmac_sha256(str2rstr_utf8(k), str2rstr_utf8(d)));
+// }
+// function any_hmac_sha256(k: string, d: string, e: any) {
+//     return rstr2any(rstr_hmac_sha256(str2rstr_utf8(k), str2rstr_utf8(d)), e);
+// }
+// /*
+//  * Perform a simple self-test to see if the VM is working
+//  */
+// function sha256_vm_test() {
+//     return (
+//         hex_sha256("abc").toLowerCase() ==
+//         "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+//     );
+// }
+/*
+ * Calculate the sha256 of a raw string
+ */
+
+File: jsencrypt/lib/lib/jsrsasign/asn1-1.0.js
+/* asn1-1.0.13.js (c) 2013-2017 Kenji Urushima | kjur.github.com/jsrsasign/license
+ */
+/*
+ * asn1.js - ASN.1 DER encoder classes
+ *
+ * Copyright (c) 2013-2017 Kenji Urushima (kenji.urushima@gmail.com)
+ *
+ * This software is licensed under the terms of the MIT License.
+ * https://kjur.github.io/jsrsasign/license
+ *
+ * The above copyright and license notice shall be
+ * included in all copies or substantial portions of the Software.
+ */
+
+
+
+==============================================================================
+SHA-256 version 2.2 (embedded in JSEncrypt 3.5.4)
+Source header: Version 2.2 Copyright Angel Marin, Paul Johnston 2000 - 2009.
+Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet.
+Full license source: https://pajhome.org.uk/site/legal.html#bsdlicense
+The BSD section is transcribed from that author's page without HTML formatting.
+Snapshot file: licenses/sha256-2.2-BSD.txt
+Snapshot SHA-256: 0498601f4098596153180236a4a1a472b8cd1e7743e8b8b7db1bde2a533ed70a
+------------------------------------------------------------------------------
+Copyright (c) 1998 - 2009, Paul Johnston & Contributors
+
+All rights reserved.
+
+
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+
+
+Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+
+
+Neither the name of the author nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+==============================================================================
+YUI BSD license (utilities inherited through jsrsasign)
+Source: https://raw.githubusercontent.com/yui/yui3/master/LICENSE.md
+The complete opening BSD license section is preserved verbatim.
+Exact YUI version inherited by JSEncrypt is not identified upstream.
+Snapshot file: licenses/yui-3-BSD.txt
+Snapshot SHA-256: 36370cdf7e5584ba616859ca78cd245b971905805afeba74f5c23221356bf38a
+------------------------------------------------------------------------------
+Software License Agreement (BSD License)
+========================================
+
+Copyright (c) 2013, Yahoo! Inc. All rights reserved.
+----------------------------------------------------
+
+Redistribution and use of this software in source and binary forms, with or
+without modification, are permitted provided that the following conditions are
+met:
+
+  * Redistributions of source code must retain the above copyright notice, this
+    list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright notice,
+    this list of conditions and the following disclaimer in the documentation
+    and/or other materials provided with the distribution.
+  * Neither the name of Yahoo! Inc. nor the names of YUI's contributors may be
+    used to endorse or promote products derived from this software without
+    specific prior written permission of Yahoo! Inc.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+==============================================================================
+KaTeX fonts
+Distributed asset version: the twenty .woff2 files of KaTeX 0.16.25.
+Included generation inputs: KaTeX repository at d2f1084c5ecca7c47295de52728e0c5f565b12ec, src/fonts and dockers/fonts.
+Additional font repository notice source:
+https://raw.githubusercontent.com/KaTeX/katex-fonts/56e79c93c88c9054b017cc92e496b383e0bf82d7/LICENSE
+This license snapshot commit is not asserted to be the generating commit of
+the redistributed font binaries; their exact matching package is KaTeX 0.16.25.
+Snapshot file: licenses/katex-fonts-MIT.txt
+Snapshot SHA-256: a7bd44abd8419bf78185be51f34216356af1adb0806ce39d6a9ca0940bd49b70
+------------------------------------------------------------------------------
+The MIT License (MIT)
+
+Copyright (c) 2018 Khan Academy
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+==============================================================================
+KaTeX 0.16.25 font-generation source headers
+Origin: original leading lines read from the verified full KaTeX source archive.
+The Makefile credits MathJax and the MathJax Consortium under Apache-2.0.
+xbbold.mf version 2.2 credits the American Mathematical Society under OFL-1.1
+and retains its upstream katex-fonts modification notice.
+These notices are preserved with the original source filenames.
+Snapshot file: licenses/katex-0.16.25-font-source-headers.txt
+Snapshot SHA-256: 3103a1e128b5b6ab6569dc6e65ade6c2444cf293d6cf24d4c4f7f99514b51bfb
+------------------------------------------------------------------------------
+File: KaTeX 0.16.25/src/fonts/Makefile
+#!gmake
+#
+# Version: Apache License 2.0
+#
+# Copyright (c) 2013 MathJax Project
+# Copyright (c) 2013 The MathJax Consortium
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+CUSTOM=custom.cfg
+
+-include $(CUSTOM)
+
+MFTRACE_MODIFIED=lib/mftrace-modified
+
+all: config fonts
+
+
+
+File: KaTeX 0.16.25/src/fonts/default.cfg
+# Note: paths should be absolute, unless they point to programs in your $PATH.
+
+##### Standard programs #####
+GREP=grep
+PERL=perl
+PYTHON=python3
+SED=sed
+WHICH=which
+KPSEWHICH=kpsewhich
+
+##### Font tools #####
+# Most of the tools below are standard and should be available from your package manager.
+FONTFORGE=fontforge
+MFTRACE=mftrace
+TTX=ttx
+TTFAUTOHINT=ttfautohint
+
+##### TeXLive Encoding
+TETEXENCODING=/usr/share/texlive/texmf-texlive/fonts/enc/dvips/tetex/
+BASEENCODING=/usr/share/texlive/texmf-texlive/fonts/enc/dvips/base/
+
+File: KaTeX 0.16.25/src/fonts/generate_fonts.py
+#!/usr/bin/env python3
+
+import sys
+import os
+import json
+
+from fontTools.ttLib import TTFont, sfnt
+from fontTools.misc.timeTools import timestampNow
+sfnt.USE_ZOPFLI = True
+
+if len(sys.argv) < 2:
+    print("Usage: %s <font file>" % sys.argv[0])
+    sys.exit(1)
+
+font_file = sys.argv[1]
+font_name = os.path.splitext(os.path.basename(font_file))[0]
+
+
+font = TTFont(font_file, recalcBBoxes=False, recalcTimestamp=False)
+
+# fix timestamp to the epoch
+font['head'].created = 0
+font['head'].modified = 0
+
+# remove fontforge timestamps
+if 'FFTM' in font:
+    del font['FFTM']
+
+
+
+File: KaTeX 0.16.25/src/fonts/makeBlacker
+#! /usr/bin/perl
+
+#  Creates the metafont file needed for darker copies of the TeX fonts,
+#  and modifies mftrace to use it.
+#
+#  Usage:  ./makeBlacker blackness
+
+require "custom.cfg.pl";
+
+$blacker = shift;
+unless ($blacker) {
+  print stderr "Usage:  ./makeBlacker blackness\n";
+  exit;
+}
+
+sub editMftrace {
+  my $oldMFTRACE = $MFTRACE_PATH;
+  $MFTRACE = "./lib/mftrace-modified";
+  print "Editing mftrace\n";
+  open(MFT,$oldMFTRACE) || die "Can't read '$oldMFTRACE': $!\n";
+  my $MFT = join("",<MFT>);
+  close(MFT);
+  $MFT =~ s!r"mf '\\mode:=(?:[^;]*)(; [^"]*)"!r"""mf '\\smode:="lib/blacker.mf"$1"""!;
+  open(MFT,">$MFTRACE") || die "Can't write '$MFTRACE': $!\n";
+  print MFT $MFT;
+  close(MFT);
+  chmod 0755, $MFTRACE;
+}
+
+
+File: KaTeX 0.16.25/src/fonts/makeFF
+#! /usr/bin/perl
+
+#  Creates the FontForge files needed to create the
+#  KaTeX fonts from the TeX source files, constructing some
+#  glyphs from two or more parts, when needed.
+#
+#  Usage:  ./makeFF
+
+require "custom.cfg.pl";
+
+#########################################################################
+
+$map{cmr10} = {
+  "Main-Regular" => [
+    [0,1] => 0x393,         # \Gamma, \Delta
+    2 => 0x398,             # \Theta
+    3 => 0x39B,             # \Lambda
+    4 => 0x39E,             # \Xi
+    5 => 0x3A0,             # \Pi
+    6 => 0x3A3,             # \Sigma
+    [7,8] => 0x3A5,         # \Upsilon, \Phi
+    [9,0xA] => 0x3A8,       # \Psi, \Omega
+
+    0x10 => 0x131,          # \i
+    0x11 => 0x237,          # \j
+    0x12 => 0x2CB,          # \grave
+    0x13 => 0x2CA,          # \acute
+    0x14 => 0x2C7,          # \check
+
+
+File: KaTeX 0.16.25/src/fonts/xbbold.mf
+%% filename: xbbold.mf
+%% version: 2.2
+%% date: 1995/01/04
+%%
+%% (katex-fonts) The line 69 is modified to prevent overflow
+%%
+%% American Mathematical Society
+%% Technical Support
+%% Publications Technical Group
+%% 201 Charles Street
+%% Providence, RI 02904
+%% USA
+%% tel: (401) 455-4080
+%%      (800) 321-4267 (USA and Canada only)
+%% fax: (401) 331-3842
+%% email: tech-support@ams.org
+%%
+%% Copyright 1995, 2009 American Mathematical Society.
+%%
+%% This Font Software is licensed under the SIL Open Font License,
+%% Version 1.1.  This license is in the accompanying file OFL.txt, and
+%% is also available with a FAQ at: http://scripts.sil.org/OFL.
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Changes of minimal parameters in outlined characters for version 2.1
+% done by Stefan Lindner, 18-April-1991
+
+
+
+
+
+==============================================================================
+Apache License 2.0 (KaTeX inherited MathJax font-generation sources)
+Source: https://www.apache.org/licenses/LICENSE-2.0.txt
+Original source copyright: (c) 2013 MathJax Project and The MathJax Consortium.
+The full unmodified license includes its standard appendix placeholders; those
+placeholders are not substituted with invented author or copyright information.
+Snapshot file: licenses/Apache-2.0.txt
+Snapshot SHA-256: cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30
+------------------------------------------------------------------------------
+
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright [yyyy] [name of copyright owner]
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+
+==============================================================================
+SIL Open Font License 1.1 (AMS xbbold font-generation input)
+Source: https://raw.githubusercontent.com/spdx/license-list-data/main/text/OFL-1.1.txt
+Original source copyright: 1995, 2009 American Mathematical Society.
+The original font copyright and modification header is reproduced above, and
+the complete OFL-1.1 license terms are reproduced below.
+Snapshot file: licenses/OFL-1.1.txt
+Snapshot SHA-256: 8eea8287e5876b539670cadb82e99f9a7afddec6f6730811be1daf25d2e9bcfd
+------------------------------------------------------------------------------
+SIL OPEN FONT LICENSE
+
+Version 1.1 - 26 February 2007
+
+PREAMBLE
+
+The goals of the Open Font License (OFL) are to stimulate worldwide development of collaborative font projects, to support the font creation efforts of academic and linguistic communities, and to provide a free and open framework in which fonts may be shared and improved in partnership with others.
+
+The OFL allows the licensed fonts to be used, studied, modified and redistributed freely as long as they are not sold by themselves. The fonts, including any derivative works, can be bundled, embedded, redistributed and/or sold with any software provided that any reserved names are not used by derivative works. The fonts and derivatives, however, cannot be released under any other type of license. The requirement for fonts to remain under this license does not apply to any document created using the fonts or their derivatives.
+
+DEFINITIONS
+
+"Font Software" refers to the set of files released by the Copyright Holder(s) under this license and clearly marked as such. This may include source files, build scripts and documentation.
+
+"Reserved Font Name" refers to any names specified as such after the copyright statement(s).
+
+"Original Version" refers to the collection of Font Software components as distributed by the Copyright Holder(s).
+
+"Modified Version" refers to any derivative made by adding to, deleting, or substituting — in part or in whole — any of the components of the Original Version, by changing formats or by porting the Font Software to a new environment.
+
+"Author" refers to any designer, engineer, programmer, technical writer or other person who contributed to the Font Software.
+
+PERMISSION & CONDITIONS
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of the Font Software, to use, study, copy, merge, embed, modify, redistribute, and sell modified and unmodified copies of the Font Software, subject to the following conditions:
+
+1) Neither the Font Software nor any of its individual components, in Original or Modified Versions, may be sold by itself.
+
+2) Original or Modified Versions of the Font Software may be bundled, redistributed and/or sold with any software, provided that each copy contains the above copyright notice and this license. These can be included either as stand-alone text files, human-readable headers or in the appropriate machine-readable metadata fields within text or binary files as long as those fields can be easily viewed by the user.
+
+3) No Modified Version of the Font Software may use the Reserved Font Name(s) unless explicit written permission is granted by the corresponding Copyright Holder. This restriction only applies to the primary font name as presented to the users.
+
+4) The name(s) of the Copyright Holder(s) or the Author(s) of the Font Software shall not be used to promote, endorse or advertise any Modified Version, except to acknowledge the contribution(s) of the Copyright Holder(s) and the Author(s) or with their explicit written permission.
+
+5) The Font Software, modified or unmodified, in part or in whole, must be distributed entirely under this license, and must not be distributed under any other license. The requirement for fonts to remain under this license does not apply to any document created using the Font Software.
+
+TERMINATION
+
+This license becomes null and void if any of the above conditions are not met.
+
+DISCLAIMER
+
+THE FONT SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM OTHER DEALINGS IN THE FONT SOFTWARE.
+

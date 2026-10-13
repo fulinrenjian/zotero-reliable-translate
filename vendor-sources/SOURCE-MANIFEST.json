@@ -1,0 +1,285 @@
+{
+  "prepared": "2026-10-13",
+  "intendedRelease": "0.1.2",
+  "archivesExecuted": false,
+  "scope": "The eight npm packages detected in the current runtime JS bundles. Seven complete upstream GitHub repositories and one exact official npm native-source distribution. Version mapping verified, with explicit exceptions and no guessed tags.",
+  "sources": [
+    {
+      "package": "collapse-white-space",
+      "version": "2.1.0",
+      "archive": "collapse-white-space-2.1.0-728911c098dd.tar.gz",
+      "sourceURL": "https://codeload.github.com/wooorm/collapse-white-space/tar.gz/728911c098ddc70e6500cbdded13899e419c2f1f",
+      "repository": "https://github.com/wooorm/collapse-white-space",
+      "commit": "728911c098ddc70e6500cbdded13899e419c2f1f",
+      "recordedNpmGitHead": "728911c098ddc70e6500cbdded13899e419c2f1f",
+      "tag": null,
+      "commitEvidence": "https://registry.npmjs.org/collapse-white-space/2.1.0",
+      "checkedSourcePackageURL": "https://raw.githubusercontent.com/wooorm/collapse-white-space/728911c098ddc70e6500cbdded13899e419c2f1f/package.json",
+      "sha256": "c4523e9bf563edb259eb425dea2a9377d718ec683e43273fb9b0071a5c3896e1",
+      "bytes": 4940,
+      "npmTarball": "https://registry.npmjs.org/collapse-white-space/-/collapse-white-space-2.1.0.tgz",
+      "npmIntegrity": "sha512-loKTxY1zCOuG4j9f6EPnuyyYkf58RnhhWTvRoZEokgB+WbdXehfjFviyOVYkqzEWz1Q5kRiZdBYS5SwxbQYwzw==",
+      "archiveKind": "complete-upstream-repository",
+      "mappingNote": "Official repository package.json at npm-recorded gitHead matches the exact installed version.",
+      "contents": "Complete upstream repository including native JavaScript preferred source; the npm package also contains that package's native JS source."
+    },
+    {
+      "package": "franc",
+      "version": "6.2.0",
+      "archive": "franc-6.2.0-612ed4fe777a.tar.gz",
+      "sourceURL": "https://codeload.github.com/wooorm/franc/tar.gz/612ed4fe777a5b16383efad367c57a359feb78ed",
+      "repository": "https://github.com/wooorm/franc",
+      "commit": "612ed4fe777a5b16383efad367c57a359feb78ed",
+      "recordedNpmGitHead": "4b17eaccaa256bb57c46d02414925eb272c3b565",
+      "tag": "6.2.0",
+      "commitEvidence": "https://api.github.com/repos/wooorm/franc/git/ref/tags/6.2.0",
+      "checkedSourcePackageURL": "https://raw.githubusercontent.com/wooorm/franc/612ed4fe777a5b16383efad367c57a359feb78ed/packages/franc/package.json",
+      "sha256": "e4c48b479b9c0c6f9d458798946f98ace761953010700cdceaccdccb83b7e06a",
+      "bytes": 576857,
+      "npmTarball": "https://registry.npmjs.org/franc/-/franc-6.2.0.tgz",
+      "npmIntegrity": "sha512-rcAewP7PSHvjq7Kgd7dhj82zE071kX5B4W1M4ewYMf/P+i6YsDQmj62Xz3VQm9zyUzUXwhIde/wHLGCMrM+yGg==",
+      "archiveKind": "complete-upstream-repository",
+      "mappingNote": "npm gitHead points to a pre-release package.json (6.1.0); official 6.2.0 tag package.json and all three native JS source files match the installed 6.2.0 distribution exactly.",
+      "contents": "Complete upstream repository including native JavaScript preferred source; the npm package also contains that package's native JS source."
+    },
+    {
+      "package": "iso639-js",
+      "version": "1.1.3",
+      "archive": "iso639-js-1.1.3-npm.tgz",
+      "sourceURL": "https://registry.npmjs.org/iso639-js/-/iso639-js-1.1.3.tgz",
+      "repository": "https://github.com/maikudou/iso639-js",
+      "commit": null,
+      "recordedNpmGitHead": "5a161b16bfdf7e4c0ae82840917da286a285f6dd",
+      "tag": null,
+      "commitEvidence": "https://registry.npmjs.org/iso639-js/1.1.3",
+      "checkedSourcePackageURL": "https://registry.npmjs.org/iso639-js/1.1.3",
+      "sha256": "2606b501ebb0bedce3ba760d84f0d771e84793a9b6604ae86c45c9908ef4ce7f",
+      "bytes": 532185,
+      "npmTarball": "https://registry.npmjs.org/iso639-js/-/iso639-js-1.1.3.tgz",
+      "npmIntegrity": "sha512-RnDva++n2R5Lwo+oRlwyy9RjIkBk9JyOeiP9eHT5OTo/FuB3Ph0EJMhXPW4h1l9pB+QILR0VKkjFRi4TgliIww==",
+      "archiveKind": "npm",
+      "mappingNote": "Recorded npm gitHead is unavailable from upstream GitHub (404). Exact official npm archive was used with registry sha512 integrity verification; it contains preferred native JS, JSON, tools and imports.",
+      "contents": "Original JavaScript, JSON language mappings, imports, generation tools and upstream README/package.json metadata."
+    },
+    {
+      "package": "jsencrypt",
+      "version": "3.5.4",
+      "archive": "jsencrypt-3.5.4-a0ae319f4011.tar.gz",
+      "sourceURL": "https://codeload.github.com/travist/jsencrypt/tar.gz/a0ae319f4011d90ec7dc15192c0f7be1f3946ee0",
+      "repository": "https://github.com/travist/jsencrypt",
+      "commit": "a0ae319f4011d90ec7dc15192c0f7be1f3946ee0",
+      "recordedNpmGitHead": "a0ae319f4011d90ec7dc15192c0f7be1f3946ee0",
+      "tag": null,
+      "commitEvidence": "https://registry.npmjs.org/jsencrypt/3.5.4",
+      "checkedSourcePackageURL": "https://raw.githubusercontent.com/travist/jsencrypt/a0ae319f4011d90ec7dc15192c0f7be1f3946ee0/package.json",
+      "sha256": "69b08b04ae6254a5e20fce2a5478cfe20fc6786157ec55a58e1663d31d83b986",
+      "bytes": 891175,
+      "npmTarball": "https://registry.npmjs.org/jsencrypt/-/jsencrypt-3.5.4.tgz",
+      "npmIntegrity": "sha512-kNjfYEMNASxrDGsmcSQh/rUTmcoRfSUkxnAz+MMywM8jtGu+fFEZ3nJjHM58zscVnwR0fYmG9sGkTDjqUdpiwA==",
+      "archiveKind": "complete-upstream-repository",
+      "mappingNote": "Official repository package.json at npm-recorded gitHead matches the exact installed version.",
+      "contents": "Complete upstream TypeScript src, embedded components, tests and build scripts; npm bin/lib alone are generated output."
+    },
+    {
+      "package": "katex",
+      "version": "0.16.25",
+      "archive": "katex-0.16.25-d2f1084c5ecc.tar.gz",
+      "sourceURL": "https://codeload.github.com/KaTeX/KaTeX/tar.gz/d2f1084c5ecca7c47295de52728e0c5f565b12ec",
+      "repository": "https://github.com/KaTeX/KaTeX",
+      "commit": "d2f1084c5ecca7c47295de52728e0c5f565b12ec",
+      "recordedNpmGitHead": "d2f1084c5ecca7c47295de52728e0c5f565b12ec",
+      "tag": null,
+      "commitEvidence": "https://registry.npmjs.org/katex/0.16.25",
+      "checkedSourcePackageURL": "https://raw.githubusercontent.com/KaTeX/KaTeX/d2f1084c5ecca7c47295de52728e0c5f565b12ec/package.json",
+      "sha256": "7c38b0cfca50313b3904d0d04060a1f96a4ddfd64e7d851d44c60a44ea4dd93d",
+      "bytes": 14809445,
+      "npmTarball": "https://registry.npmjs.org/katex/-/katex-0.16.25.tgz",
+      "npmIntegrity": "sha512-woHRUZ/iF23GBP1dkDQMh1QBad9dmr8/PAwNA54VrSOVYgI12MAcE14TqnDdQOdzyEonGzMepYnqBMYdsoAr8Q==",
+      "archiveKind": "complete-upstream-repository",
+      "mappingNote": "Official repository package.json at npm-recorded gitHead matches the exact installed version.",
+      "contents": "Complete upstream source, src/fonts generation inputs and dockers/fonts build scripts; npm src is present but npm font-generation sources are incomplete."
+    },
+    {
+      "package": "n-gram",
+      "version": "2.0.2",
+      "archive": "n-gram-2.0.2-4533b691a4cb.tar.gz",
+      "sourceURL": "https://codeload.github.com/words/n-gram/tar.gz/4533b691a4cbd39c58538a89f17d25c5bf6f5aa3",
+      "repository": "https://github.com/words/n-gram",
+      "commit": "4533b691a4cbd39c58538a89f17d25c5bf6f5aa3",
+      "recordedNpmGitHead": "4533b691a4cbd39c58538a89f17d25c5bf6f5aa3",
+      "tag": null,
+      "commitEvidence": "https://registry.npmjs.org/n-gram/2.0.2",
+      "checkedSourcePackageURL": "https://raw.githubusercontent.com/words/n-gram/4533b691a4cbd39c58538a89f17d25c5bf6f5aa3/package.json",
+      "sha256": "e50595f7670a443223f70f1c560a0b4dfbd865500acd183607959ff67444659b",
+      "bytes": 5356,
+      "npmTarball": "https://registry.npmjs.org/n-gram/-/n-gram-2.0.2.tgz",
+      "npmIntegrity": "sha512-S24aGsn+HLBxUGVAUFOwGpKs7LBcG4RudKU//eWzt/mQ97/NMKQxDWHyHx63UNWk/OOdihgmzoETn1tf5nQDzQ==",
+      "archiveKind": "complete-upstream-repository",
+      "mappingNote": "Official repository package.json at npm-recorded gitHead matches the exact installed version.",
+      "contents": "Complete upstream repository including native JavaScript preferred source; the npm package also contains that package's native JS source."
+    },
+    {
+      "package": "trigram-utils",
+      "version": "2.0.1",
+      "archive": "trigram-utils-2.0.1-ea7788294bca.tar.gz",
+      "sourceURL": "https://codeload.github.com/wooorm/trigram-utils/tar.gz/ea7788294bcaef39c7ae7aa94bf412885e5d6edf",
+      "repository": "https://github.com/wooorm/trigram-utils",
+      "commit": "ea7788294bcaef39c7ae7aa94bf412885e5d6edf",
+      "recordedNpmGitHead": "ea7788294bcaef39c7ae7aa94bf412885e5d6edf",
+      "tag": null,
+      "commitEvidence": "https://registry.npmjs.org/trigram-utils/2.0.1",
+      "checkedSourcePackageURL": "https://raw.githubusercontent.com/wooorm/trigram-utils/ea7788294bcaef39c7ae7aa94bf412885e5d6edf/package.json",
+      "sha256": "e70acadcebbb83965646d303977d81aeeffd7ba9f696086420b26464a263a934",
+      "bytes": 5836,
+      "npmTarball": "https://registry.npmjs.org/trigram-utils/-/trigram-utils-2.0.1.tgz",
+      "npmIntegrity": "sha512-nfWIXHEaB+HdyslAfMxSqWKDdmqY9I32jS7GnqpdWQnLH89r6A5sdk3fDVYqGAZ0CrT8ovAFSAo6HRiWcWNIGQ==",
+      "archiveKind": "complete-upstream-repository",
+      "mappingNote": "Official repository package.json at npm-recorded gitHead matches the exact installed version.",
+      "contents": "Complete upstream repository including native JavaScript preferred source; the npm package also contains that package's native JS source."
+    },
+    {
+      "package": "zotero-plugin-toolkit",
+      "version": "6.0.0",
+      "archive": "zotero-plugin-toolkit-6.0.0-0fbfd0258921.tar.gz",
+      "sourceURL": "https://codeload.github.com/windingwind/zotero-plugin-toolkit/tar.gz/0fbfd0258921044de1854b89d66b27762b10ee0a",
+      "repository": "https://github.com/windingwind/zotero-plugin-toolkit",
+      "commit": "0fbfd0258921044de1854b89d66b27762b10ee0a",
+      "recordedNpmGitHead": "0fbfd0258921044de1854b89d66b27762b10ee0a",
+      "tag": null,
+      "commitEvidence": "https://registry.npmjs.org/zotero-plugin-toolkit/6.0.0",
+      "checkedSourcePackageURL": "https://raw.githubusercontent.com/windingwind/zotero-plugin-toolkit/0fbfd0258921044de1854b89d66b27762b10ee0a/package.json",
+      "sha256": "eea08a2c3298acfe8d372014eeec4657eceaad0c56c884a3c20c4002b91a41e5",
+      "bytes": 129187,
+      "npmTarball": "https://registry.npmjs.org/zotero-plugin-toolkit/-/zotero-plugin-toolkit-6.0.0.tgz",
+      "npmIntegrity": "sha512-2iFzT+Kg6/A79r7p81DqFu6RL7hCcRhEwL0LYEyXFFOLK3+azJMzfbPh12AL+MJuKUgBlh9KnBzUyMYamn6EhQ==",
+      "archiveKind": "complete-upstream-repository",
+      "mappingNote": "Official repository package.json at npm-recorded gitHead matches the exact installed version.",
+      "contents": "Complete upstream TypeScript source and build configuration; npm dist alone is generated output."
+    }
+  ],
+  "fonts": {
+    "assetPackage": "katex@0.16.25",
+    "separateFontNoticeSnapshot": "56e79c93c88c9054b017cc92e496b383e0bf82d7",
+    "separateFontNoticeIsNotClaimedAsBinaryGeneratingCommit": true,
+    "files": [
+      {
+        "file": "addon/chrome/content/styles/fonts/KaTeX_AMS-Regular.woff2",
+        "sha256": "0cdd387c9590a1a9f9794560022dbb59654a7d86f187aa0c81495ad42d3a7308",
+        "matchesInstalledKaTeX": true
+      },
+      {
+        "file": "addon/chrome/content/styles/fonts/KaTeX_Caligraphic-Bold.woff2",
+        "sha256": "de7701e42cf1f4cf0b766c03fb27977207eee2f4fd5d76fa82188406da43ea4c",
+        "matchesInstalledKaTeX": true
+      },
+      {
+        "file": "addon/chrome/content/styles/fonts/KaTeX_Caligraphic-Regular.woff2",
+        "sha256": "5d53e70ad607c2352162dec9e0923fb54ecdafaccbf604cd8dcf7d00facb989b",
+        "matchesInstalledKaTeX": true
+      },
+      {
+        "file": "addon/chrome/content/styles/fonts/KaTeX_Fraktur-Bold.woff2",
+        "sha256": "74444efd593c005e3f4573b44524704c0af0a937fe911cca9e94068d0d140d3f",
+        "matchesInstalledKaTeX": true
+      },
+      {
+        "file": "addon/chrome/content/styles/fonts/KaTeX_Fraktur-Regular.woff2",
+        "sha256": "51814d270d06ff0255dba0799994fa4d8c84d11f09951d47595f4abb1f3602dc",
+        "matchesInstalledKaTeX": true
+      },
+      {
+        "file": "addon/chrome/content/styles/fonts/KaTeX_Main-Bold.woff2",
+        "sha256": "0f60d1b897938ec918c8ce073092411baf9438f6739465693ff18b0f9d20b021",
+        "matchesInstalledKaTeX": true
+      },
+      {
+        "file": "addon/chrome/content/styles/fonts/KaTeX_Main-BoldItalic.woff2",
+        "sha256": "99cd42a3c072d918f2f44984a807cf7aa16e13545fd0875fc07c6c65f99e715b",
+        "matchesInstalledKaTeX": true
+      },
+      {
+        "file": "addon/chrome/content/styles/fonts/KaTeX_Main-Italic.woff2",
+        "sha256": "97479ca6cce906abc961ecac96faa5f9ca2e61b8e7670d475826bcdee9a7c267",
+        "matchesInstalledKaTeX": true
+      },
+      {
+        "file": "addon/chrome/content/styles/fonts/KaTeX_Main-Regular.woff2",
+        "sha256": "c2342cd8b869e01752a9321dc17213fc40d4d04c79688c1d43f2cf316abd7866",
+        "matchesInstalledKaTeX": true
+      },
+      {
+        "file": "addon/chrome/content/styles/fonts/KaTeX_Math-BoldItalic.woff2",
+        "sha256": "dc47344dbb6cb5b655c8460d561f4df5f501b90c804ad3c6cec65fe322351ab1",
+        "matchesInstalledKaTeX": true
+      },
+      {
+        "file": "addon/chrome/content/styles/fonts/KaTeX_Math-Italic.woff2",
+        "sha256": "7af58c5ec8f132a2ddde9027c6d7814decce4d3b822a11192a42a20e2e973264",
+        "matchesInstalledKaTeX": true
+      },
+      {
+        "file": "addon/chrome/content/styles/fonts/KaTeX_SansSerif-Bold.woff2",
+        "sha256": "e99ae51144bf1232efcc1bfe5add36262c6866b0faab24fa75740e1b98577a62",
+        "matchesInstalledKaTeX": true
+      },
+      {
+        "file": "addon/chrome/content/styles/fonts/KaTeX_SansSerif-Italic.woff2",
+        "sha256": "00b26ac825e2095056396e0553b8ac26d3f8ad158c3826e28b4c45b385c4714a",
+        "matchesInstalledKaTeX": true
+      },
+      {
+        "file": "addon/chrome/content/styles/fonts/KaTeX_SansSerif-Regular.woff2",
+        "sha256": "68e8c73ef42afd3ccec58bf0fba302cce448938e7fc020a5e31f8a952eee1342",
+        "matchesInstalledKaTeX": true
+      },
+      {
+        "file": "addon/chrome/content/styles/fonts/KaTeX_Script-Regular.woff2",
+        "sha256": "036d4e95149b69ff9bcc0cd55771efeb25ffa3947293e69acd78d5ac328c684b",
+        "matchesInstalledKaTeX": true
+      },
+      {
+        "file": "addon/chrome/content/styles/fonts/KaTeX_Size1-Regular.woff2",
+        "sha256": "6b47c40166b6dbe21a5dfca7718413f2147fd2399be1ba605d8ad39cedf25dfe",
+        "matchesInstalledKaTeX": true
+      },
+      {
+        "file": "addon/chrome/content/styles/fonts/KaTeX_Size2-Regular.woff2",
+        "sha256": "d04c54219f9eaec6d4d4fd42dfb28785975a4794d6b2fc71e566b9cd6db842dd",
+        "matchesInstalledKaTeX": true
+      },
+      {
+        "file": "addon/chrome/content/styles/fonts/KaTeX_Size3-Regular.woff2",
+        "sha256": "73d591271b1604960cb10bb90fee021670af7297017e0e98480b332d11f51995",
+        "matchesInstalledKaTeX": true
+      },
+      {
+        "file": "addon/chrome/content/styles/fonts/KaTeX_Size4-Regular.woff2",
+        "sha256": "a4af7d414440a1c1790825cfb700cf9cf43b0f2c4b04f0ebc523011ad9853ec0",
+        "matchesInstalledKaTeX": true
+      },
+      {
+        "file": "addon/chrome/content/styles/fonts/KaTeX_Typewriter-Regular.woff2",
+        "sha256": "71d517d67827787cfabdf186914cc3358eda539e37931941f2b2fd4a21f68c0b",
+        "matchesInstalledKaTeX": true
+      }
+    ],
+    "generationInputs": "KaTeX src/fonts and dockers/fonts in the pinned complete repository",
+    "externalSystemBuildDependenciesNotBundled": [
+      "TeX Live base and recommended fonts (original Makefile uses Computer Modern and AMS font inputs)",
+      "FontForge, mftrace, ttfautohint, GNU build tools",
+      "fonttools, brotli, zopfli as specified by the original Dockerfile"
+    ],
+    "specificSourceLicenses": [
+      "MathJax font-generation Makefile: Apache-2.0, original 2013 MathJax copyright header retained",
+      "xbbold.mf version 2.2: OFL-1.1, Copyright 1995, 2009 American Mathematical Society, upstream modification notice retained"
+    ]
+  },
+  "limitations": [
+    "Development-tool dependency archives and their transitive packages are not included; package-lock.json records reproducible installations.",
+    "iso639-js originally declares ISC but does not include a separate copyright/license file; no copyright year was invented.",
+    "iso639-js README credits SIL, Wikipedia and other sources without a complete data-rights provenance record.",
+    "JSEncrypt's notice identifies inherited YUI code without the exact inherited YUI version.",
+    "Inherited plugin images, logos and service-provider access permissions are outside this dependency source inventory.",
+    "Font regeneration depends on external system TeX fonts and build tools; the archive contains the original generation inputs and instructions, not a self-contained toolchain or a bit-identical regeneration guarantee."
+  ]
+}

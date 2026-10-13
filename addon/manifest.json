@@ -6,15 +6,14 @@
   "author": "__author__",
   "homepage_url": "__homepage__",
   "icons": {
-    "48": "chrome/content/icons/favicon.png",
-    "96": "chrome/content/icons/favicon@2x.png"
+    "48": "chrome/content/icons/reliable-translate.svg",
+    "96": "chrome/content/icons/reliable-translate.svg"
   },
   "applications": {
     "zotero": {
       "id": "__addonID__",
-      "update_url": "__updateURL__",
-      "strict_min_version": "7.9.9",
-      "strict_max_version": "10.9.9"
+      "strict_min_version": "10.0",
+      "strict_max_version": "10.0.*"
     }
   }
 }

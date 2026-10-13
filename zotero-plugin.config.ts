@@ -1,6 +1,7 @@
 import { defineConfig } from "zotero-plugin-scaffold";
 import pkg from "./package.json";
-import { copyFileSync } from "fs";
+import { readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
 export default defineConfig({
   source: ["src", "addon"],
@@ -8,11 +9,8 @@ export default defineConfig({
   name: pkg.config.addonName,
   id: pkg.config.addonID,
   namespace: pkg.config.addonRef,
-  updateURL: `https://github.com/{{owner}}/{{repo}}/releases/download/release/${
-    pkg.version.includes("-") ? "update-beta.json" : "update.json"
-  }`,
-  xpiDownloadLink:
-    "https://github.com/{{owner}}/{{repo}}/releases/download/v{{version}}/{{xpiName}}.xpi",
+  // Zotero requires a secure update URL even for manual local distributions.
+  // A loopback placeholder keeps this fork independent of remote releases.
 
   server: {
     asProxy: false,
@@ -32,6 +30,19 @@ export default defineConfig({
 
   build: {
     assets: ["addon/**/*.*"],
+    // Avoid the scaffold's asynchronous manifest write and upstream update URL.
+    makeManifest: { enable: false },
+    hooks: {
+      // Both Zotero's required-field and HTTPS checks must pass. This fork has
+      // no updater server; startup disables background updates for its own ID.
+      "build:makeManifest": (ctx) => {
+        const path = join(ctx.dist, "addon", "manifest.json");
+        const manifest = JSON.parse(readFileSync(path, "utf8"));
+        manifest.applications.zotero.update_url =
+          "https://127.0.0.1:65535/reliabletranslate/updates.json";
+        writeFileSync(path, JSON.stringify(manifest, null, 2));
+      },
+    },
     define: {
       ...pkg.config,
       author: pkg.author,
