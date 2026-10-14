@@ -1,6 +1,6 @@
 {
   "name": "zotero-reliable-translate",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Reliable Translate: an independently maintained, AGPL-licensed fork of Translate for Zotero with selection status, retry and saved translation notes.",
   "config": {
     "addonName": "划词翻译增强版（Reliable Translate）",
@@ -17,7 +17,7 @@
     "lint": "prettier --write . && eslint . --fix",
     "test": "zotero-plugin test",
     "update-deps": "npm update --save",
-    "test:local": "node --test test/reliableRunner.test.mjs test/reliableSelection.test.mjs test/reliableIntegration.test.cjs test/cnkiChunks.test.mjs test/reliablePopup.test.mjs test/reliableSetup.test.cjs test/reliablePanel.test.cjs test/fastProviders.test.cjs test/cnkiToken.test.cjs test/reliableNote.test.mjs test/reliableSpeedSetup.test.cjs"
+    "test:local": "node --test test/reliableRunner.test.mjs test/reliableSelection.test.mjs test/reliableIntegration.test.cjs test/cnkiChunks.test.mjs test/reliablePopup.test.mjs test/reliablePopupGeometry.test.mjs test/reliableSetup.test.cjs test/reliablePanel.test.cjs test/fastProviders.test.cjs test/cnkiToken.test.cjs test/reliableNote.test.mjs test/reliableSpeedSetup.test.cjs"
   },
   "repository": {
     "type": "git",

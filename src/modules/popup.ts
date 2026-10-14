@@ -15,6 +15,7 @@ import {
   rememberSelectionSettings,
 } from "./reliablePopupBinding";
 import { saveSelectionToNote } from "./reliableNote";
+import { createPopupLayout, updatePopupText } from "./reliablePopupLayout";
 
 type ReaderEvent = _ZoteroTypes.Reader.EventParams<"renderTextSelectionPopup">;
 
@@ -44,6 +45,9 @@ interface PopupView {
   audioSignature: string;
   autoplayTaskId: string;
   observer?: MutationObserver;
+  layout?: ReturnType<typeof createPopupLayout>;
+  displayedTaskId?: string;
+  displayedMode?: PopupTextMode;
   originalWidth: string;
   originalMaxWidth: string;
   originalBoxSizing: string;
@@ -110,7 +114,13 @@ export function updateReaderPopup() {
       presentation.status === "fail"
         ? "var(--color-accent-red, #a52a2a)"
         : "inherit";
-    view.text.value = presentation.text;
+    updatePopupText(
+      view.text,
+      presentation.text,
+      view.displayedTaskId !== task.id || view.displayedMode !== view.mode,
+    );
+    view.displayedTaskId = task.id;
+    view.displayedMode = view.mode;
     view.text.style.direction = (view.mode === "raw"
       ? task.langfrom
       : task.langto
@@ -177,7 +187,7 @@ export function updateReaderPopup() {
     view.noteMessage.hidden = !view.noteFeedback;
     view.noteMessage.style.display = view.noteFeedback ? "block" : "none";
     updateAudio(view, task);
-    constrainToViewport(view.popup);
+    view.layout?.scheduleFit();
   }
 }
 
@@ -203,6 +213,16 @@ export function buildReaderPopup(event: ReaderEvent, task: TranslateTask) {
     view = createView(event, popup, readerKey);
     views.set(popup, view);
     append(view.panel);
+    const remember = getPref("keepPopupSize") !== false;
+    view.layout = createPopupLayout(popup, view.panel, view.text, {
+      width: remember ? Number(getPref("reliablePopup.width")) : undefined,
+      height: remember ? Number(getPref("reliablePopup.height")) : undefined,
+      onResize: (width, height) => {
+        if (getPref("keepPopupSize") === false) return;
+        setPref("reliablePopup.width", width);
+        setPref("reliablePopup.height", height);
+      },
+    });
     needsWatch = true;
   }
   view.reader = reader;
@@ -210,11 +230,6 @@ export function buildReaderPopup(event: ReaderEvent, task: TranslateTask) {
   view.mode = "result";
   popupBindings.bind(readerKey, task, popup);
   addon.data.popup.currentPopup = popup;
-  applyStyles(popup, {
-    width: "320px",
-    maxWidth: "calc(100vw - 16px)",
-    boxSizing: "border-box",
-  });
   updateReaderPopup();
   // Core rendering and translation must not depend on optional observation.
   if (needsWatch && views.get(popup) === view) watchPopup(view);
@@ -234,9 +249,8 @@ function createView(
     flexDirection: "column",
     gap: "6px",
     width: "100%",
-    maxHeight: "240px",
-    overflowY: "auto",
-    overflowX: "hidden",
+    minHeight: "0",
+    overflow: "hidden",
     padding: "8px 6px 6px",
     boxSizing: "border-box",
     fontFamily: "inherit",
@@ -252,6 +266,9 @@ function createView(
   applyStyles(header, { display: "flex", alignItems: "center", gap: "4px" });
   const rawButton = button(doc, "原文", "raw");
   const resultButton = button(doc, "译文", "result");
+  const resetSize = button(doc, "↺", "size-reset");
+  resetSize.title = "恢复默认浮窗大小";
+  resetSize.setAttribute("aria-label", "恢复默认浮窗大小");
   const status = doc.createElement("span");
   status.dataset.reliableRole = "status";
   status.setAttribute("role", "status");
@@ -261,7 +278,7 @@ function createView(
     fontSize: "12px",
     whiteSpace: "nowrap",
   });
-  header.append(rawButton, resultButton, status);
+  header.append(rawButton, resultButton, resetSize, status);
 
   const text = doc.createElement("textarea");
   text.dataset.reliableRole = "text";
@@ -271,10 +288,9 @@ function createView(
   text.rows = 4;
   applyStyles(text, {
     width: "100%",
-    height: "96px",
-    minHeight: "64px",
-    maxHeight: "144px",
-    resize: "vertical",
+    flex: "1 1 0",
+    minHeight: "0",
+    resize: "none",
     overflow: "auto",
     padding: "6px",
     boxSizing: "border-box",
@@ -370,6 +386,7 @@ function createView(
     view.mode = "result";
     updateReaderPopup();
   });
+  resetSize.addEventListener("click", () => view.layout?.reset());
   translateButton.addEventListener("click", () => {
     void startNewAttempt(view);
   });
@@ -600,28 +617,6 @@ function updateAudio(view: PopupView, task: TranslateTask) {
   }
 }
 
-function constrainToViewport(popup: HTMLDivElement) {
-  const doc = popup.ownerDocument;
-  const width = doc.documentElement.clientWidth || doc.body.clientWidth;
-  const height = doc.documentElement.clientHeight || doc.body.clientHeight;
-  const rect = popup.getBoundingClientRect();
-  if (!width || !height || !rect.width || !rect.height) return;
-  const leftShift =
-    rect.left < 8
-      ? 8 - rect.left
-      : rect.right > width - 8
-        ? width - 8 - rect.right
-        : 0;
-  const topShift =
-    rect.top < 8
-      ? 8 - rect.top
-      : rect.bottom > height - 8
-        ? height - 8 - rect.bottom
-        : 0;
-  if (leftShift) popup.style.left = `${popup.offsetLeft + leftShift}px`;
-  if (topShift) popup.style.top = `${popup.offsetTop + topShift}px`;
-}
-
 function watchPopup(view: PopupView) {
   try {
     // Register unload independently, so it survives an observer failure.
@@ -640,6 +635,7 @@ function watchPopup(view: PopupView) {
     ).MutationObserver;
     view.observer = new Observer(() => {
       if (popupIsDismissed(view.popup)) disposeView(view);
+      else view.layout?.scheduleFit();
     });
     view.observer.observe(view.popup.ownerDocument.body, {
       childList: true,
@@ -681,6 +677,7 @@ function disposeView(view: PopupView) {
     view.noteTranslationTask.result = "浮窗已关闭，本次加入笔记的翻译已取消。";
   }
   view.observer?.disconnect();
+  view.layout?.dispose();
   popupBindings.closePopup(view.popup);
   view.panel.remove();
   view.popup.style.width = view.originalWidth;

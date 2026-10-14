@@ -1,4 +1,4 @@
-Reliable Translate 0.1.2
+Reliable Translate 0.1.3
 Fork initiated and maintained by fulinrenjian; development assisted by AI.
 Based on Translate for Zotero v2.4.8 by windingwind and contributors.
 Upstream commit: 2e3d77ddbf3157d8813c61c828957386ab802bdb
@@ -8,3 +8,5 @@ Publication preparation on 2026-10-13: independent project metadata, fork icon,
 documentation, third-party license notices and corresponding dependency sources.
 These changes do not claim sole authorship of the upstream project.
 Third-party components retain their own licenses; see THIRD_PARTY_NOTICES.txt.
+Local changes on 2026-10-14: whole-popup eight-direction resizing, remembered
+dimensions, single text scrolling region and preserved reading/copy positions.

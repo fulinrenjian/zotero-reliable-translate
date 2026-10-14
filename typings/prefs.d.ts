@@ -44,6 +44,8 @@ declare namespace _ZoteroTypes {
       "showItemBoxAbstractTranslation": boolean;
       "keepWindowTop": boolean;
       "keepPopupSize": boolean;
+      "reliablePopup.width": number;
+      "reliablePopup.height": number;
       "popupWidth": number;
       "popupHeight": number;
       "niutransEndpoint": string;

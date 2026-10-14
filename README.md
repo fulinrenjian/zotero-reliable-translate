@@ -5,6 +5,7 @@
 ## 主要改进
 
 - 划词浮窗显示翻译进度、完成和失败状态，支持重试、复制及切换服务。
+- 拖动浮窗四边或四角可调整整体宽高并记住尺寸；点击「↺」恢复默认大小。正文为单一滚动区。
 - 译文绑定当前阅读器与选区，避免旧请求结果覆盖新选区。
 - 段落默认使用必应适配器；已完成的同一选区可复用结果。
 - 「加入笔记」追加到当前阅读器中打开的可编辑笔记末尾；没有编辑器时新建当前文献的子笔记。独立附件会在同一文库创建独立笔记。
@@ -14,7 +15,7 @@
 
 目标版本为 **Zotero 10.0.x**。功能实机验证环境为 Windows、Zotero 10.0.6，其他平台尚未实测。
 
-1. 在本仓库 [Releases](https://github.com/fulinrenjian/zotero-reliable-translate/releases) 下载 XPI。若尚未发布，可按下文从源码构建。
+1. 在本仓库 [0.1.3 发布页](https://github.com/fulinrenjian/zotero-reliable-translate/releases/tag/v0.1.3) 下载 `Reliable-Translate-0.1.3.xpi`。
 2. 在 Zotero「工具 → 插件」中停用原 Translate for Zotero，避免重复触发。
 3. 点击齿轮 →「从文件安装插件」，选择 XPI，按提示重启。
 4. 打开 PDF 并选择英文，完成后可复制译文或点击「加入笔记」。
@@ -27,7 +28,7 @@
 
 实机已核对新建子笔记、追加到同一笔记、原有文本保留、原文/译文/来源/页码/位置元数据落盘及同次选区防重复。复杂格式和图片保留仅经过离线检查。
 
-0.1.2 整理了署名、文档、图标、许可和发布材料，沿用 0.1.1 的翻译及笔记逻辑。上述时间不是所有网络环境下的保证，也不代表已经实测 0.1.2 的新图标。详见 [验证说明](docs/VERIFICATION.md) 和 [更新记录](CHANGELOG.md)。
+0.1.3 进一步改进了浮窗缩放与滚动。上述历史时间不是所有网络环境下的保证，新版实测范围见 [验证说明](docs/VERIFICATION.md) 和 [更新记录](CHANGELOG.md)。
 
 ## 在线翻译与使用条件
 
@@ -54,7 +55,7 @@ XPI 位于 `build/`。`test:local` 使用本地模拟对象验证选区、请求
 ## 来源与许可
 
 - 上游：windingwind 及 [上游贡献者](https://github.com/windingwind/zotero-pdf-translate/graphs/contributors)。基准提交：`2e3d77ddbf3157d8813c61c828957386ab802bdb`（v2.4.8）。
-- 本分支：fulinrenjian，AI 辅助开发。修改时间：2026-10-12 至 2026-10-13；修改范围见 [CHANGELOG.md](CHANGELOG.md)。
+- 本分支：fulinrenjian，AI 辅助开发。修改时间：2026-10-12 至 2026-10-14；修改范围见 [CHANGELOG.md](CHANGELOG.md)。
 - 项目许可：[AGPL-3.0-or-later](LICENSE)。[NOTICE](addon/NOTICE.txt) 记录改版来源；第三方组件保留各自的 [许可与版权通知](addon/THIRD_PARTY_NOTICES.txt)。
 - 新增的 `reliable-translate.svg` 图标由本分支以矢量路径制作，并按项目许可分发；其他继承资源保留上游归属。
 
