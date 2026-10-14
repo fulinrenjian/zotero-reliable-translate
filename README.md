@@ -6,6 +6,7 @@
 
 - 划词浮窗显示翻译进度、完成和失败状态，支持重试、复制及切换服务。
 - 拖动浮窗四边或四角可调整整体宽高并记住尺寸；点击「↺」恢复默认大小。正文为单一滚动区。
+- 0.1.4 新增「⠿ 移动」手柄，按住可把翻译框移到不遮挡图片的位置。
 - 译文绑定当前阅读器与选区，避免旧请求结果覆盖新选区。
 - 段落默认使用必应适配器；已完成的同一选区可复用结果。
 - 「加入笔记」追加到当前阅读器中打开的可编辑笔记末尾；没有编辑器时新建当前文献的子笔记。独立附件会在同一文库创建独立笔记。
@@ -15,7 +16,7 @@
 
 目标版本为 **Zotero 10.0.x**。功能实机验证环境为 Windows、Zotero 10.0.6，其他平台尚未实测。
 
-1. 在本仓库 [0.1.3 发布页](https://github.com/fulinrenjian/zotero-reliable-translate/releases/tag/v0.1.3) 下载 `Reliable-Translate-0.1.3.xpi`。
+1. 在本仓库 [0.1.4 发布页](https://github.com/fulinrenjian/zotero-reliable-translate/releases/tag/v0.1.4) 下载 `Reliable-Translate-0.1.4.xpi`。
 2. 在 Zotero「工具 → 插件」中停用原 Translate for Zotero，避免重复触发。
 3. 点击齿轮 →「从文件安装插件」，选择 XPI，按提示重启。
 4. 打开 PDF 并选择英文，完成后可复制译文或点击「加入笔记」。

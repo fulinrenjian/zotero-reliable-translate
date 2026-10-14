@@ -802,6 +802,7 @@ function mockPopup(onTranslate, extraPrefs = {}) {
           "addtonote",
           "audio",
           "size-reset",
+          "move",
         ].map((role) => [
           role,
           find(popup, (element) => element.dataset.reliableRole === role),
@@ -863,6 +864,24 @@ function startResize(reader, edge, pointerId = 13) {
   });
   assert.equal(event.defaultPrevented, true);
   assert.equal(handle.hasPointerCapture(pointerId), true);
+  return { handle, pointerId, clientX, clientY };
+}
+
+function startMove(reader, pointerId = 17) {
+  const handle = reader.controls().move;
+  assert.ok(handle, "the separate move button must exist");
+  const rect = reader.popup.getBoundingClientRect();
+  const clientX = rect.left + 150,
+    clientY = rect.top + 30;
+  const event = handle.fire("pointerdown", {
+    button: 0,
+    pointerId,
+    clientX,
+    clientY,
+  });
+  assert.equal(event.defaultPrevented, true);
+  assert.equal(handle.hasPointerCapture(pointerId), true);
+  assert.equal(handle.style.cursor, "grabbing");
   return { handle, pointerId, clientX, clientY };
 }
 
@@ -1666,5 +1685,196 @@ test("native popup removal during drag cleans up without persisting an offline s
     [ui.prefs["reliablePopup.width"], ui.prefs["reliablePopup.height"]],
     [420, 360],
   );
+  ui.disposeReaderPopups();
+});
+
+test("move button drags the whole popup without resizing or rewriting dimensions", () => {
+  const ui = mockPopup();
+  const reader = ui.reader();
+  ui.buildReaderPopup(reader.event, task("move", "source", "success", "译文"));
+  const before = reader.popup.getBoundingClientRect();
+  assert.match(reader.controls().move.textContent, /移动/);
+  const drag = startMove(reader);
+  moveResize(reader, drag, 160, 120);
+  endResize(reader, drag);
+  const after = reader.popup.getBoundingClientRect();
+  assert.deepEqual(
+    [after.left, after.top, after.width, after.height],
+    [before.left + 160, before.top + 120, before.width, before.height],
+  );
+  assert.equal(drag.handle.style.cursor, "grab");
+  assert.equal(ui.prefWrites.length, 0);
+  assert.equal(reader.handles().length, 8);
+  ui.disposeReaderPopups();
+});
+
+test("moving remains clamped to all reader edges and keeps its dimensions", () => {
+  const ui = mockPopup();
+  const reader = ui.reader();
+  ui.buildReaderPopup(reader.event, task("move-bounds", "source"));
+  let drag = startMove(reader);
+  moveResize(reader, drag, 10000, 10000);
+  endResize(reader, drag);
+  let rect = reader.popup.getBoundingClientRect();
+  assert.deepEqual(
+    [rect.left, rect.top, rect.width, rect.height],
+    [772, 432, 420, 360],
+  );
+  drag = startMove(reader);
+  moveResize(reader, drag, -10000, -10000);
+  endResize(reader, drag);
+  rect = reader.popup.getBoundingClientRect();
+  assert.deepEqual(
+    [rect.left, rect.top, rect.width, rect.height],
+    [8, 8, 420, 360],
+  );
+  assertInside(rect, reader.view.fixedRect);
+  ui.disposeReaderPopups();
+});
+
+test("status refresh and native repositioning cannot pull a moved popup back", async () => {
+  const ui = mockPopup();
+  const reader = ui.reader();
+  const current = task("pin", "source", "processing", "部分译文");
+  ui.buildReaderPopup(reader.event, current);
+  const drag = startMove(reader);
+  moveResize(reader, drag, 180, 130);
+  endResize(reader, drag);
+  const moved = reader.popup.getBoundingClientRect();
+  current.status = "success";
+  current.result = "完成译文";
+  reader.popup.style.transform = "translate(20px, 15px)";
+  ui.updateReaderPopup();
+  reader.doc.flushAnimationFrames();
+  await flush();
+  reader.doc.flushAnimationFrames();
+  const after = reader.popup.getBoundingClientRect();
+  assert.deepEqual(
+    [after.left, after.top, after.width, after.height],
+    [moved.left, moved.top, moved.width, moved.height],
+  );
+  assert.equal(reader.controls().text.value, "完成译文");
+  assert.equal(reader.controls().copy.disabled, false);
+  ui.disposeReaderPopups();
+});
+
+test("translation text and other buttons remain interactive without beginning a move", async () => {
+  const ui = mockPopup();
+  const reader = ui.reader();
+  ui.buildReaderPopup(
+    reader.event,
+    task("interactive", "Source words", "success", "完整译文"),
+  );
+  const drag = startMove(reader);
+  moveResize(reader, drag, 100, 100);
+  endResize(reader, drag);
+  const moved = reader.popup.getBoundingClientRect();
+  const text = reader.controls().text;
+  const down = text.fire("pointerdown", {
+    button: 0,
+    pointerId: 22,
+    clientX: moved.left + 40,
+    clientY: moved.top + 100,
+  });
+  assert.equal(down.defaultPrevented, false);
+  text.setSelectionRange(0, 2);
+  text.fire("keydown", { key: "c", ctrlKey: true });
+  reader.controls().copy.fire("click");
+  reader.controls().raw.fire("click");
+  assert.equal(text.value, "Source words");
+  reader.controls().result.fire("click");
+  reader.controls().translate.fire("pointerdown", { button: 0, pointerId: 23 });
+  reader.doc.fire("pointermove", {
+    pointerId: 23,
+    clientX: 1000,
+    clientY: 700,
+  });
+  assert.deepEqual(
+    [
+      reader.popup.getBoundingClientRect().left,
+      reader.popup.getBoundingClientRect().top,
+    ],
+    [moved.left, moved.top],
+  );
+  assert.deepEqual(ui.copies, ["完整", "完整译文"]);
+  reader.controls().translate.fire("click");
+  await flush();
+  assert.equal(ui.translates.length, 1);
+  assert.equal(reader.controls().status.textContent, "翻译完成");
+  ui.disposeReaderPopups();
+});
+
+test("move pin follows scaled coordinates and does not overwrite saved width or height", () => {
+  const ui = mockPopup();
+  const reader = ui.reader("scaled-move", 1, {
+    viewport: { width: 1600, height: 1200 },
+    scale: { x: 2, y: 2 },
+  });
+  ui.buildReaderPopup(reader.event, task("scaled-move", "source"));
+  const before = reader.popup.getBoundingClientRect();
+  const drag = startMove(reader);
+  moveResize(reader, drag, 80, 60);
+  endResize(reader, drag);
+  const pinned = reader.popup.getBoundingClientRect();
+  assert.deepEqual(
+    [pinned.left, pinned.top],
+    [before.left + 80, before.top + 60],
+  );
+  reader.doc.scale = { x: 1.5, y: 1.5 };
+  reader.doc.defaultView.fire("resize");
+  reader.doc.flushAnimationFrames();
+  const scaled = reader.popup.getBoundingClientRect();
+  assert.ok(Math.abs(scaled.left - pinned.left) < 1e-8);
+  assert.ok(Math.abs(scaled.top - pinned.top) < 1e-8);
+  assert.deepEqual([scaled.width, scaled.height], [630, 540]);
+  assert.deepEqual(
+    [ui.prefs["reliablePopup.width"], ui.prefs["reliablePopup.height"]],
+    [420, 360],
+  );
+  assert.equal(ui.prefWrites.length, 0);
+  ui.disposeReaderPopups();
+});
+
+test("native new-selection reconstruction releases the old pin and uses its new anchor", () => {
+  const ui = mockPopup();
+  const reader = ui.reader();
+  ui.buildReaderPopup(reader.event, task("old-selection", "first source"));
+  const drag = startMove(reader);
+  moveResize(reader, drag, 300, 100);
+  endResize(reader, drag);
+  reader.rebuildSections();
+  reader.popup.style.transform = "translate(330px, 200px)";
+  ui.buildReaderPopup(reader.event, task("new-selection", "new source"));
+  reader.doc.flushAnimationFrames();
+  const rect = reader.popup.getBoundingClientRect();
+  assert.deepEqual(
+    [rect.left, rect.top, rect.width, rect.height],
+    [330, 200, 420, 360],
+  );
+  assert.equal(reader.controls().text.scrollTop, 0);
+  ui.disposeReaderPopups();
+});
+
+test("closing during a move releases capture and removes its own handlers", async () => {
+  const ui = mockPopup();
+  const reader = ui.reader();
+  ui.buildReaderPopup(reader.event, task("close-move", "source"));
+  const drag = startMove(reader);
+  moveResize(reader, drag, 120, 80);
+  reader.popup.remove();
+  await flush();
+  assert.equal(drag.handle.hasPointerCapture(drag.pointerId), false);
+  for (const type of [
+    "pointerdown",
+    "lostpointercapture",
+    "mousedown",
+    "mouseup",
+    "click",
+    "dblclick",
+  ])
+    assert.equal((drag.handle.listeners.get(type) || []).length, 0);
+  assert.equal((reader.doc.listeners.get("pointermove") || []).length, 0);
+  assert.equal(ui.prefWrites.length, 0);
+  assert.equal(reader.doc.frames.size, 0);
   ui.disposeReaderPopups();
 });

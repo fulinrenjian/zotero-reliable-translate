@@ -1,6 +1,6 @@
 {
   "name": "zotero-reliable-translate",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Reliable Translate: an independently maintained, AGPL-licensed fork of Translate for Zotero with selection status, retry and saved translation notes.",
   "config": {
     "addonName": "划词翻译增强版（Reliable Translate）",

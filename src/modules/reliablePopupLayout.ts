@@ -1,5 +1,6 @@
 import {
   clampPopupRect,
+  movePopupRect,
   normalizeWheelDelta,
   resizePopupRect,
   type PopupRect,
@@ -16,6 +17,7 @@ type StyleValues = Partial<CSSStyleDeclaration>;
 type Options = {
   width?: number;
   height?: number;
+  moveHandle?: HTMLElement;
   onResize?: (width: number, height: number) => void;
 };
 
@@ -33,14 +35,15 @@ export function createPopupLayout(
   const handles: HTMLDivElement[] = [];
   let disposed = false;
   let pendingFrame: number | undefined;
+  let movedPosition: { left: number; top: number } | undefined;
   let drag:
     | {
-        edge: ResizeEdge;
+        operation: ResizeEdge | "move";
         pointerId: number;
         x: number;
         y: number;
         start: PopupRect;
-        handle: HTMLDivElement;
+        handle: HTMLElement;
         changed: boolean;
       }
     | undefined;
@@ -137,7 +140,13 @@ export function createPopupLayout(
     if (disposed || !popup.isConnected || drag) return;
     const area = bounds();
     if (!area.width || !area.height) return;
-    applyRect(clampPopupRect(localRect(), area, limits()));
+    const rect = clampPopupRect(
+      { ...localRect(), ...movedPosition },
+      area,
+      limits(),
+    );
+    applyRect(rect);
+    if (movedPosition) movedPosition = { left: rect.left, top: rect.top };
   }
 
   function scheduleFit() {
@@ -164,6 +173,8 @@ export function createPopupLayout(
     const current = drag;
     if (!current) return;
     drag = undefined;
+    if (current.operation === "move")
+      styles(current.handle, { cursor: "grab" });
     try {
       if (current.handle.hasPointerCapture?.(current.pointerId))
         current.handle.releasePointerCapture(current.pointerId);
@@ -171,7 +182,7 @@ export function createPopupLayout(
       /* The reader may have removed the captured node. */
     }
     fitToViewport();
-    if (current.changed) remember();
+    if (current.changed && current.operation !== "move") remember();
   }
 
   function onMove(event: Event) {
@@ -179,17 +190,26 @@ export function createPopupLayout(
     if (!drag || e.pointerId !== drag.pointerId) return;
     e.preventDefault();
     e.stopPropagation();
-    const rect = resizePopupRect(
-      drag.start,
-      drag.edge,
-      e.clientX - drag.x,
-      e.clientY - drag.y,
-      bounds(),
-      limits(),
-    );
+    const dx = e.clientX - drag.x;
+    const dy = e.clientY - drag.y;
+    const rect =
+      drag.operation === "move"
+        ? movePopupRect(drag.start, dx, dy, bounds(), limits())
+        : resizePopupRect(
+            drag.start,
+            drag.operation,
+            dx,
+            dy,
+            bounds(),
+            limits(),
+          );
     drag.changed ||=
+      Math.abs(rect.left - drag.start.left) > 0.1 ||
+      Math.abs(rect.top - drag.start.top) > 0.1 ||
       Math.abs(rect.width - drag.start.width) > 0.1 ||
       Math.abs(rect.height - drag.start.height) > 0.1;
+    if (drag.operation === "move" || movedPosition)
+      movedPosition = { left: rect.left, top: rect.top };
     applyRect(rect);
   }
 
@@ -197,6 +217,33 @@ export function createPopupLayout(
     if (!drag || (event as PointerEvent).pointerId !== drag.pointerId) return;
     event.stopPropagation();
     finishDrag();
+  }
+
+  function beginDrag(
+    operation: ResizeEdge | "move",
+    handle: HTMLElement,
+    e: PointerEvent,
+  ) {
+    if (disposed || e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    finishDrag();
+    fitToViewport();
+    drag = {
+      operation,
+      pointerId: e.pointerId,
+      x: e.clientX,
+      y: e.clientY,
+      start: localRect(),
+      handle,
+      changed: false,
+    };
+    if (operation === "move") styles(handle, { cursor: "grabbing" });
+    try {
+      handle.setPointerCapture(e.pointerId);
+    } catch {
+      /* Document listeners provide a fallback. */
+    }
   }
 
   const chain: HTMLElement[] = [];
@@ -333,33 +380,27 @@ export function createPopupLayout(
       });
       handle.append(grip);
     }
-    listen(handle, "pointerdown", (event) => {
-      const e = event as PointerEvent;
-      if (disposed || e.button !== 0) return;
-      e.preventDefault();
-      e.stopPropagation();
-      finishDrag();
-      fitToViewport();
-      drag = {
-        edge,
-        pointerId: e.pointerId,
-        x: e.clientX,
-        y: e.clientY,
-        start: localRect(),
-        handle,
-        changed: false,
-      };
-      try {
-        handle.setPointerCapture(e.pointerId);
-      } catch {
-        /* Document listeners provide a fallback. */
-      }
-    });
+    listen(handle, "pointerdown", (event) =>
+      beginDrag(edge, handle, event as PointerEvent),
+    );
     listen(handle, "lostpointercapture", onEnd);
     for (const type of ["mousedown", "mouseup", "click", "dblclick"])
       listen(handle, type, (event) => event.stopPropagation());
     popup.append(handle);
     handles.push(handle);
+  }
+  if (options.moveHandle) {
+    const handle = options.moveHandle;
+    styles(handle, { cursor: "grab", touchAction: "none", userSelect: "none" });
+    listen(handle, "pointerdown", (event) =>
+      beginDrag("move", handle, event as PointerEvent),
+    );
+    listen(handle, "lostpointercapture", onEnd);
+    for (const type of ["mousedown", "mouseup", "click", "dblclick"])
+      listen(handle, type, (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      });
   }
   listen(doc, "pointermove", onMove, true);
   listen(doc, "pointerup", onEnd, true);

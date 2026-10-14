@@ -3,6 +3,7 @@ import { test } from "node:test";
 import {
   clampPopupRect,
   resizePopupRect,
+  movePopupRect,
   normalizeWheelDelta,
 } from "../src/utils/reliablePopupGeometry.ts";
 
@@ -205,6 +206,83 @@ test("wheel delta supports pixel, line and page units with preserved direction",
   assert.equal(normalizeWheelDelta(-2, 1, 18, 300), -36);
   assert.equal(normalizeWheelDelta(0.5, 2, 18, 300), 150);
   assert.equal(normalizeWheelDelta(-1.5, 2, 18, 300), -450);
+});
+
+test("moving changes only position and preserves subpixel displacement", () => {
+  assert.deepEqual(movePopupRect(start, 40.5, -20.25, viewport, limits), {
+    left: 160.5,
+    top: 79.75,
+    width: 260,
+    height: 220,
+  });
+  assert.deepEqual(movePopupRect(start, 0, 0, viewport, limits), start);
+});
+
+test("moving to each boundary clamps position without squeezing the popup", () => {
+  assert.deepEqual(movePopupRect(start, -10000, -10000, viewport, limits), {
+    left: 8,
+    top: 8,
+    width: 260,
+    height: 220,
+  });
+  assert.deepEqual(movePopupRect(start, 10000, 10000, viewport, limits), {
+    left: 632,
+    top: 472,
+    width: 260,
+    height: 220,
+  });
+  assert.deepEqual(movePopupRect(start, -10000, 10000, viewport, limits), {
+    left: 8,
+    top: 472,
+    width: 260,
+    height: 220,
+  });
+  assert.deepEqual(movePopupRect(start, 10000, -10000, viewport, limits), {
+    left: 632,
+    top: 8,
+    width: 260,
+    height: 220,
+  });
+});
+
+test("non-finite move deltas are ignored independently and large finite deltas remain bounded", () => {
+  assert.deepEqual(
+    movePopupRect(start, NaN, Infinity, viewport, limits),
+    start,
+  );
+  assert.deepEqual(movePopupRect(start, -Infinity, 20, viewport, limits), {
+    ...start,
+    top: 120,
+  });
+  assert.deepEqual(movePopupRect(start, 30, NaN, viewport, limits), {
+    ...start,
+    left: 150,
+  });
+  const moved = movePopupRect(
+    start,
+    Number.MAX_VALUE,
+    -Number.MAX_VALUE,
+    viewport,
+    limits,
+  );
+  assert.deepEqual(moved, { left: 632, top: 8, width: 260, height: 220 });
+  assertFits(moved, viewport);
+});
+
+test("tiny and zero viewports move only the already fitted rectangle without overflow", () => {
+  for (const view of [
+    { width: 100, height: 60 },
+    { width: 0, height: 0 },
+  ]) {
+    const fitted = clampPopupRect(start, view, limits);
+    for (const dx of [-1000, 0, 1000])
+      for (const dy of [-1000, 0, 1000]) {
+        const moved = movePopupRect(start, dx, dy, view, limits);
+        assert.equal(moved.width, fitted.width);
+        assert.equal(moved.height, fitted.height);
+        assertFits(moved, view);
+      }
+  }
 });
 
 test("trackpad fractions are not rounded and anomalous wheel values stay finite", () => {

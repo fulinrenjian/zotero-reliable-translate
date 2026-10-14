@@ -28,6 +28,7 @@ interface PopupView {
   mode: PopupTextMode;
   rawButton: HTMLButtonElement;
   resultButton: HTMLButtonElement;
+  moveHandle: HTMLButtonElement;
   status: HTMLSpanElement;
   text: HTMLTextAreaElement;
   translateButton: HTMLButtonElement;
@@ -217,6 +218,7 @@ export function buildReaderPopup(event: ReaderEvent, task: TranslateTask) {
     view.layout = createPopupLayout(popup, view.panel, view.text, {
       width: remember ? Number(getPref("reliablePopup.width")) : undefined,
       height: remember ? Number(getPref("reliablePopup.height")) : undefined,
+      moveHandle: view.moveHandle,
       onResize: (width, height) => {
         if (getPref("keepPopupSize") === false) return;
         setPref("reliablePopup.width", width);
@@ -269,6 +271,9 @@ function createView(
   const resetSize = button(doc, "↺", "size-reset");
   resetSize.title = "恢复默认浮窗大小";
   resetSize.setAttribute("aria-label", "恢复默认浮窗大小");
+  const moveHandle = button(doc, "⠿ 移动", "move");
+  moveHandle.title = "按住这里拖动翻译框，移开后可查看下方图片";
+  moveHandle.setAttribute("aria-label", "拖动翻译框");
   const status = doc.createElement("span");
   status.dataset.reliableRole = "status";
   status.setAttribute("role", "status");
@@ -278,7 +283,7 @@ function createView(
     fontSize: "12px",
     whiteSpace: "nowrap",
   });
-  header.append(rawButton, resultButton, resetSize, status);
+  header.append(rawButton, resultButton, resetSize, moveHandle, status);
 
   const text = doc.createElement("textarea");
   text.dataset.reliableRole = "text";
@@ -359,6 +364,7 @@ function createView(
     mode: "result",
     rawButton,
     resultButton,
+    moveHandle,
     status,
     text,
     translateButton,

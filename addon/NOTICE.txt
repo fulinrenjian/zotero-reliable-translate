@@ -1,4 +1,4 @@
-Reliable Translate 0.1.3
+Reliable Translate 0.1.4
 Fork initiated and maintained by fulinrenjian; development assisted by AI.
 Based on Translate for Zotero v2.4.8 by windingwind and contributors.
 Upstream commit: 2e3d77ddbf3157d8813c61c828957386ab802bdb
@@ -10,3 +10,5 @@ These changes do not claim sole authorship of the upstream project.
 Third-party components retain their own licenses; see THIRD_PARTY_NOTICES.txt.
 Local changes on 2026-10-14: whole-popup eight-direction resizing, remembered
 dimensions, single text scrolling region and preserved reading/copy positions.
+Additional local changes on 2026-10-14: an explicit drag handle moves the popup
+within the reader while preserving its size, controls and translated text.

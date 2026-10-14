@@ -1,13 +1,13 @@
 # 划词翻译增强版（Reliable Translate）
 
-本页保留实现与迁移细节。项目使用与署名以 [README.md](README.md) 为入口；分支维护者为 fulinrenjian，AI 辅助开发。0.1.2 是公开发布材料整理版；0.1.3 是已在本机安装验证的浮窗缩放与滚动修复版，对应源码和安装包见 [0.1.3 发布页](https://github.com/fulinrenjian/zotero-reliable-translate/releases/tag/v0.1.3)。各版本的实测范围详见 [验证说明](docs/VERIFICATION.md)。
+本页保留实现与迁移细节。项目使用与署名以 [README.md](README.md) 为入口；分支维护者为 fulinrenjian，AI 辅助开发。0.1.4 在浮窗缩放与滚动修复的基础上新增移动手柄，对应源码和安装包见 [0.1.4 发布页](https://github.com/fulinrenjian/zotero-reliable-translate/releases/tag/v0.1.4)。各版本的实测范围详见 [验证说明](docs/VERIFICATION.md)。
 
 这是基于 [Translate for Zotero v2.4.8](https://github.com/windingwind/zotero-pdf-translate/releases/tag/v2.4.8) 的开源定制版，保留上游翻译服务与配置界面，针对划词翻译的状态显示、重试和选区绑定作修改。它不是上游官方发行版。
 
 ## 插件身份与兼容性
 
 - 名称：划词翻译增强版（Reliable Translate）
-- 版本：0.1.3
+- 版本：0.1.4
 - 插件 ID：`reliabletranslate@codex.local`
 - 资源命名空间：`reliabletranslate`
 - Zotero 全局实例：`ReliableTranslate`
@@ -25,6 +25,12 @@
 如果旧版 Translate for Zotero 仍处于启用状态，新版会显示提示并暂停注册翻译入口，避免两套划词监听和快捷键同时触发。请在 Zotero「工具 → 插件」中停用旧版，再重新启用本插件或重启 Zotero。插件不会自行更改旧版的启用状态。
 
 浮窗应分别显示原文和翻译状态，并提供手动翻译／重试入口。服务端断连、限流或要求人工验证时应显示相应错误；本插件不能保证第三方服务始终可用，也不会绕过其验证。
+
+## 0.1.4 移动翻译框
+
+按住浮窗顶部的「⠿ 移动」并拖动，可把翻译框移开，查看下方图片。移动保持现有宽高，范围限制在当前阅读器可见区域。译文刷新或切换原文/译文时保留当前浮窗位置；重新选择另一段文字时，浮窗由原生阅读器放在新选区附近。
+
+本机从 0.1.3 升级并正常重启后，已在单词选区中实测顶部手柄移动、右边界限制及原文/译文切换后位置保持。移动过程中浮窗维持 420 × 317 尺寸，底下 PDF 未滚动，八个缩放手柄和原生颜色按钮均保留。重新点击同一单词产生新浮窗时，恢复原生选区附近的位置。193 项离线测试、类型检查和构建通过。本轮未做完整图注或段落测速，也未重新实测笔记保存及物理触控板。
 
 ## 0.1.3 浮窗缩放与滚动
 

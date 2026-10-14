@@ -116,6 +116,31 @@ export function resizePopupRect(
   return { left, top, width: right - left, height: bottom - top };
 }
 
+/** Move a fitted rectangle while preserving its dimensions and viewport bounds. */
+export function movePopupRect(
+  start: PopupRect,
+  dx: number,
+  dy: number,
+  viewport: PopupViewport,
+  limits: PopupLimits,
+): PopupRect {
+  const initial = clampPopupRect(start, viewport, limits);
+  const area = bounds(viewport, limits);
+  return {
+    ...initial,
+    left: between(
+      initial.left + finite(dx, 0),
+      area.left,
+      area.right - initial.width,
+    ),
+    top: between(
+      initial.top + finite(dy, 0),
+      area.top,
+      area.bottom - initial.height,
+    ),
+  };
+}
+
 /** Normalize WheelEvent delta units without rounding away trackpad precision. */
 export function normalizeWheelDelta(
   deltaY: number,
